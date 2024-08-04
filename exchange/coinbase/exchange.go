@@ -15,8 +15,8 @@ import (
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
-	"github.com/avinashpandit/crypto-agg/exchange/utils"
 	"github.com/avinashpandit/crypto-agg/pair"
+	"github.com/avinashpandit/crypto-agg/utils"
 )
 
 type Coinbase struct {
