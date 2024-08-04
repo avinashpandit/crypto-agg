@@ -13,10 +13,10 @@ import (
 
 	cmap "github.com/orcaman/concurrent-map"
 
-	"github.com/bitontop/gored/coin"
-	"github.com/bitontop/gored/exchange"
-	"github.com/bitontop/gored/pair"
-	"github.com/bitontop/gored/utils"
+	"github.com/avinashpandit/crypto-agg/coin"
+	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/pair"
+	"github.com/avinashpandit/crypto-agg/utils"
 )
 
 type Ftx struct {

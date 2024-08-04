@@ -14,9 +14,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/bitontop/gored/coin"
-	"github.com/bitontop/gored/exchange"
-	"github.com/bitontop/gored/pair"
+	"github.com/avinashpandit/crypto-agg/coin"
+	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/pair"
 )
 
 const (
@@ -109,10 +109,13 @@ func (e *Oksim) GetCoinsData() error {
 	return nil
 }
 
-/* GetPairsData - Get Pairs Information (If API provide)
+/*
+	GetPairsData - Get Pairs Information (If API provide)
+
 Step 1: Change Instance Name    (e *<exchange Instance Name>)
 Step 2: Add Model of API Response
-Step 3: Modify API Path(strRequestUrl)*/
+Step 3: Modify API Path(strRequestUrl)
+*/
 func (e *Oksim) GetPairsData() error {
 	if e.API_KEY == "" || e.API_SECRET == "" || e.Passphrase == "" {
 		return fmt.Errorf("%s API Key, Secret Key or Passphrase are nil", e.GetName())
@@ -188,13 +191,15 @@ func (e *Oksim) GetPairsData() error {
 	return nil
 }
 
-/*Get Pair Market Depth
+/*
+Get Pair Market Depth
 Step 1: Change Instance Name    (e *<exchange Instance Name>)
 Step 2: Add Model of API Response
 Step 3: Get Exchange Pair Code ex. symbol := e.GetPairCode(p)
 Step 4: Modify API Path(strRequestUrl)
 Step 5: Add Params - Depend on API request
-Step 6: Convert the response to Standard Maker struct*/
+Step 6: Convert the response to Standard Maker struct
+*/
 func (e *Oksim) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 	if e.API_KEY == "" || e.API_SECRET == "" || e.Passphrase == "" {
 		return nil, fmt.Errorf("%s API Key, Secret Key or Passphrase are nil", e.GetName())

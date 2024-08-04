@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/bitontop/gored/exchange"
-	"github.com/bitontop/gored/utils"
+	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/utils"
 )
 
 func (e *Homiex) LoadPublicData(operation *exchange.PublicOperation) error {

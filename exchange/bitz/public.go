@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"time"
 
-	exchange "github.com/bitontop/gored/exchange"
-	utils "github.com/bitontop/gored/utils"
+	exchange "github.com/avinashpandit/crypto-agg/exchange"
+	utils "github.com/avinashpandit/crypto-agg/utils"
 )
 
 /*************** PUBLIC  API ***************/

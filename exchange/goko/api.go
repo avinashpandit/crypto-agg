@@ -15,9 +15,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/bitontop/gored/coin"
-	"github.com/bitontop/gored/exchange"
-	"github.com/bitontop/gored/pair"
+	"github.com/avinashpandit/crypto-agg/coin"
+	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/pair"
 )
 
 /*The Base Endpoint URL*/
@@ -132,10 +132,13 @@ func (e *Goko) GetCoinsData() error {
 	return nil
 }
 
-/* GetPairsData - Get Pairs Information (If API provide)
+/*
+	GetPairsData - Get Pairs Information (If API provide)
+
 Step 1: Change Instance Name    (e *<exchange Instance Name>)
 Step 2: Add Model of API Response
-Step 3: Modify API Path(strRequestUrl)*/
+Step 3: Modify API Path(strRequestUrl)
+*/
 func (e *Goko) GetPairsData() error {
 	jsonResponse := &JsonResponse{}
 	pairsData := PairsData{}
@@ -189,13 +192,15 @@ func (e *Goko) GetPairsData() error {
 	return nil
 }
 
-/*Get Pair Market Depth
+/*
+Get Pair Market Depth
 Step 1: Change Instance Name    (e *<exchange Instance Name>)
 Step 2: Add Model of API Response
 Step 3: Get Exchange Pair Code ex. symbol := e.GetSymbolByPair(p)
 Step 4: Modify API Path(strRequestUrl)
 Step 5: Add Params - Depend on API request
-Step 6: Convert the response to Standard Maker struct*/
+Step 6: Convert the response to Standard Maker struct
+*/
 func (e *Goko) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 	jsonResponse := &JsonResponse{}
 	orderBook := OrderBook{}
@@ -509,9 +514,11 @@ func (e *Goko) ApiKeyGet(strRequestPath string, mapParams map[string]string) str
 	return string(body)
 }
 
-/*Method: API Request and Signature is required
+/*
+Method: API Request and Signature is required
 Step 1: Change Instance Name    (e *<exchange Instance Name>)
-Step 2: Create mapParams Depend on API Signature request*/
+Step 2: Create mapParams Depend on API Signature request
+*/
 func (e *Goko) ApiKeyRequest(strMethod, strRequestPath string, mapParams map[string]string) string {
 	strUrl := API_URL + strRequestPath
 

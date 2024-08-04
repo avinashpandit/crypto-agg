@@ -3,7 +3,7 @@ package mxc
 import (
 	"fmt"
 
-	"github.com/bitontop/gored/exchange"
+	"github.com/avinashpandit/crypto-agg/exchange"
 )
 
 func (e *Mxc) LoadPublicData(operation *exchange.PublicOperation) error {

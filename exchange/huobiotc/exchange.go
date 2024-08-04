@@ -14,10 +14,10 @@ import (
 
 	cmap "github.com/orcaman/concurrent-map"
 
-	"github.com/bitontop/gored/coin"
-	"github.com/bitontop/gored/exchange"
-	"github.com/bitontop/gored/pair"
-	"github.com/bitontop/gored/utils"
+	"github.com/avinashpandit/crypto-agg/coin"
+	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/pair"
+	"github.com/avinashpandit/crypto-agg/utils"
 )
 
 type HuobiOTC struct {
@@ -172,7 +172,7 @@ func (e *HuobiOTC) DeleteCoin(coin *coin.Coin) {
 
 /*************** Pairs on the Exchanges ***************/
 func (e *HuobiOTC) GetPairConstraint(pair *pair.Pair) *exchange.PairConstraint {
-	if pair == nil{
+	if pair == nil {
 		return nil
 	}
 	if tmp, ok := pairConstraintMap.Get(fmt.Sprintf("%d", pair.ID)); ok {

@@ -6,7 +6,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/bitontop/gored/exchange"
+	"github.com/avinashpandit/crypto-agg/exchange"
 )
 
 func (e *Okex) DoAccountOperation(operation *exchange.AccountOperation) error {

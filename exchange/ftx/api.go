@@ -13,9 +13,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bitontop/gored/coin"
-	"github.com/bitontop/gored/exchange"
-	"github.com/bitontop/gored/pair"
+	"github.com/avinashpandit/crypto-agg/coin"
+	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/pair"
 
 	"strconv"
 )
@@ -103,10 +103,13 @@ func (e *Ftx) GetCoinsData() error {
 	return nil
 }
 
-/* GetPairsData - Get Pairs Information (If API provide)
+/*
+	GetPairsData - Get Pairs Information (If API provide)
+
 Step 1: Change Instance Name    (e *<exchange Instance Name>)
 Step 2: Add Model of API Response
-Step 3: Modify API Path(strRequestUrl)*/
+Step 3: Modify API Path(strRequestUrl)
+*/
 func (e *Ftx) GetPairsData() error {
 	jsonResponse := &JsonResponse{}
 	pairsData := PairsData{}

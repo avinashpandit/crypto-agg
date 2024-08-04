@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/bitontop/gored/exchange"
+	"github.com/avinashpandit/crypto-agg/exchange"
 )
 
 func (e *Ftx) DoAccountOperation(operation *exchange.AccountOperation) error {
@@ -587,7 +587,7 @@ func (e *Ftx) doGetPositions(operation *exchange.AccountOperation) error {
 	return err
 }
 
-//!-- not done yet
+// !-- not done yet
 func (e *Ftx) doGetAccount(operation *exchange.AccountOperation) error {
 	// var str string
 	var err error

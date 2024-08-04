@@ -7,12 +7,12 @@ package main
 import (
 	"log"
 
-	"github.com/bitontop/gored/coin"
-	"github.com/bitontop/gored/exchange"
-	"github.com/bitontop/gored/initial"
-	"github.com/bitontop/gored/pair"
-	"github.com/bitontop/gored/test/conf"
-	"github.com/bitontop/gored/utils"
+	"github.com/avinashpandit/crypto-agg/coin"
+	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/initial"
+	"github.com/avinashpandit/crypto-agg/pair"
+	"github.com/avinashpandit/crypto-agg/test/conf"
+	"github.com/avinashpandit/crypto-agg/utils"
 	"github.com/davecgh/go-spew/spew"
 )
 

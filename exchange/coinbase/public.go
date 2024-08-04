@@ -11,10 +11,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/bitontop/gored/coin"
-	exchange "github.com/bitontop/gored/exchange"
-	"github.com/bitontop/gored/pair"
-	utils "github.com/bitontop/gored/utils"
+	"github.com/avinashpandit/crypto-agg/coin"
+	exchange "github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/pair"
+	utils "github.com/avinashpandit/crypto-agg/utils"
 )
 
 /*The Base Endpoint URL*/

@@ -15,9 +15,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bitontop/gored/coin"
-	"github.com/bitontop/gored/exchange"
-	"github.com/bitontop/gored/pair"
+	"github.com/avinashpandit/crypto-agg/coin"
+	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/pair"
 )
 
 const (
@@ -104,10 +104,13 @@ func (e *Bitz) GetCoinsData() error {
 	return nil
 }
 
-/* GetPairsData - Get Pairs Information (If API provide)
+/*
+	GetPairsData - Get Pairs Information (If API provide)
+
 Step 1: Change Instance Name    (e *<exchange Instance Name>)
 Step 2: Add Model of API Response
-Step 3: Modify API Path(strRequestUrl)*/
+Step 3: Modify API Path(strRequestUrl)
+*/
 func (e *Bitz) GetPairsData() error {
 	jsonResponse := &JsonResponse{}
 	pairsData := make(map[string]*PairsData)
@@ -163,13 +166,15 @@ func (e *Bitz) GetPairsData() error {
 	return nil
 }
 
-/*Get Pair Market Depth
+/*
+Get Pair Market Depth
 Step 1: Change Instance Name    (e *<exchange Instance Name>)
 Step 2: Add Model of API Response
 Step 3: Get Exchange Pair Code ex. symbol := e.GetPairCode(p)
 Step 4: Modify API Path(strRequestUrl)
 Step 5: Add Params - Depend on API request
-Step 6: Convert the response to Standard Maker struct*/
+Step 6: Convert the response to Standard Maker struct
+*/
 func (e *Bitz) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 	jsonResponse := &JsonResponse{}
 	orderBook := OrderBook{}
@@ -438,7 +443,7 @@ func (e *Bitz) LimitBuy(pair *pair.Pair, quantity, rate float64) (*exchange.Orde
 		OrderID:      orderID,
 		Rate:         rate,
 		Quantity:     quantity,
-		Direction:         exchange.Buy,
+		Direction:    exchange.Buy,
 		Status:       exchange.New,
 		JsonResponse: jsonPlaceReturn,
 	}

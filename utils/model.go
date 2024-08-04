@@ -5,9 +5,9 @@ package utils
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 import (
-	"github.com/bitontop/gored/coin"
-	"github.com/bitontop/gored/exchange"
-	"github.com/bitontop/gored/pair"
+	"github.com/avinashpandit/crypto-agg/coin"
+	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/pair"
 	cmap "github.com/orcaman/concurrent-map"
 )
 

@@ -14,9 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bitontop/gored/coin"
-	"github.com/bitontop/gored/exchange"
-	"github.com/bitontop/gored/pair"
+	"github.com/avinashpandit/crypto-agg/coin"
+	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/pair"
 )
 
 /*The Base Endpoint URL*/
@@ -128,10 +128,13 @@ func (e *Bitmex) GetCoinsData() error {
 	return nil
 }
 
-/* GetPairsData - Get Pairs Information (If API provide)
+/*
+	GetPairsData - Get Pairs Information (If API provide)
+
 Step 1: Change Instance Name    (e *<exchange Instance Name>)
 Step 2: Add Model of API Response
-Step 3: Modify API Path(strRequestUrl)*/
+Step 3: Modify API Path(strRequestUrl)
+*/
 func (e *Bitmex) GetPairsData() error {
 	pairsData := &PairsData{}
 
@@ -184,13 +187,15 @@ func (e *Bitmex) GetPairsData() error {
 	return nil
 }
 
-/*Get Pair Market Depth
+/*
+Get Pair Market Depth
 Step 1: Change Instance Name    (e *<exchange Instance Name>)
 Step 2: Add Model of API Response
 Step 3: Get Exchange Pair Code ex. symbol := e.GetPairCode(p)
 Step 4: Modify API Path(strRequestUrl)
 Step 5: Add Params - Depend on API request
-Step 6: Convert the response to Standard Maker struct*/
+Step 6: Convert the response to Standard Maker struct
+*/
 func (e *Bitmex) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 	errResponse := ErrorResponse{}
 	orderBook := OrderBook{}
@@ -453,10 +458,12 @@ func (e *Bitmex) ApiKeyGet(mapParams map[string]string, strRequestPath string) s
 	return string(body)
 }
 
-/*Method: API Request and Signature is required
+/*
+Method: API Request and Signature is required
 Step 1: Change Instance Name    (e *<exchange Instance Name>)
 Step 2: Create mapParams Depend on API Signature request
-Step 3: Add HttpGetRequest below strUrl if API has different requests*/
+Step 3: Add HttpGetRequest below strUrl if API has different requests
+*/
 func (e *Bitmex) ApiKeyPost(mapParams map[string]string, strRequestPath string) string {
 	strMethod := "POST"
 	timestamp := time.Now().Unix() + 5

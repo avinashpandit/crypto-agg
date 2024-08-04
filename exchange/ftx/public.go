@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/bitontop/gored/exchange"
-	"github.com/bitontop/gored/utils"
+	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/utils"
 )
 
 /*************** PUBLIC  API ***************/

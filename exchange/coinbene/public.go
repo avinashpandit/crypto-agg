@@ -7,7 +7,7 @@ package coinbene
 import (
 	"fmt"
 
-	exchange "github.com/bitontop/gored/exchange"
+	exchange "github.com/avinashpandit/crypto-agg/exchange"
 )
 
 /*************** PUBLIC  API ***************/

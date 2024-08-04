@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/bitontop/gored/exchange"
+	"github.com/avinashpandit/crypto-agg/exchange"
 )
 
 func (e *Binance) doContractGetOpenOrder(operation *exchange.AccountOperation) error {

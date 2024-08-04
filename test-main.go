@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/bitontop/gored/exchange"
-	"github.com/bitontop/gored/pair"
+	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/pair"
 	// "../../exchange/kraken"
 	// "../../utils"
 	// "../conf"

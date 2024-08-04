@@ -13,10 +13,10 @@ import (
 
 	cmap "github.com/orcaman/concurrent-map"
 
-	"github.com/bitontop/gored/coin"
-	"github.com/bitontop/gored/exchange"
-	"github.com/bitontop/gored/pair"
-	"github.com/bitontop/gored/utils"
+	"github.com/avinashpandit/crypto-agg/coin"
+	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/pair"
+	"github.com/avinashpandit/crypto-agg/utils"
 )
 
 type Deribit struct {
@@ -102,8 +102,8 @@ func (e *Deribit) GetName() exchange.ExchangeName {
 }
 
 func (e *Deribit) GetTradingWebURL(pair *pair.Pair) string {
-	return fmt.Sprintf("https://www.deribit.com/main#/futures?tab=BTC-27SEP19"/* , e.GetSymbolByCoin(pair.Target) */)
-// SINCE ONLY CQBTC PAIR IS IN USE
+	return fmt.Sprintf("https://www.deribit.com/main#/futures?tab=BTC-27SEP19" /* , e.GetSymbolByCoin(pair.Target) */)
+	// SINCE ONLY CQBTC PAIR IS IN USE
 }
 
 func (e *Deribit) GetBalance(coin *coin.Coin) float64 {
@@ -172,7 +172,7 @@ func (e *Deribit) DeleteCoin(coin *coin.Coin) {
 
 /*************** Pairs on the Exchanges ***************/
 func (e *Deribit) GetPairConstraint(pair *pair.Pair) *exchange.PairConstraint {
-	if pair == nil{
+	if pair == nil {
 		return nil
 	}
 	if tmp, ok := pairConstraintMap.Get(fmt.Sprintf("%d", pair.ID)); ok {
