@@ -6,100 +6,48 @@ package main
 
 import (
 	"log"
-	"os"
-	"time"
 
 	"github.com/avinashpandit/crypto-agg/coin"
-	"github.com/avinashpandit/crypto-agg/conf"
 	"github.com/avinashpandit/crypto-agg/exchange"
-	"github.com/avinashpandit/crypto-agg/exchange/coinbase"
-	"github.com/avinashpandit/crypto-agg/exchange/kraken"
+	"github.com/avinashpandit/crypto-agg/initial"
 	"github.com/avinashpandit/crypto-agg/pair"
-	"github.com/avinashpandit/crypto-agg/utils"
 )
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Llongfile)
-	exMan := exchange.CreateExchangeManager()
+	Init()
 
-	if len(os.Args) > 1 {
-		switch os.Args[1] {
-		/* case "export":
-		Init(exchange.EXCHANGE_API, "")
-		utils.ConvertBaseDataToJson("./data")
-		for _, ex := range exMan.GetExchanges() {
-			utils.ConvertExchangeDataToJson("./data", ex)
-		}
-		break */
-		case "json":
-			Init(exchange.JSON_FILE, "./data")
-			for _, ex := range exMan.GetExchanges() {
-				for _, coin := range ex.GetCoins() {
-					log.Printf("%s Coin %+v", ex.GetName(), coin)
-				}
-				for _, pair := range ex.GetPairs() {
-					log.Printf("%s Pair %+v", ex.GetName(), pair)
-				}
-			}
-			break
-		case "renew":
-			Init(exchange.JSON_FILE, "./data")
-			updateConfig := &exchange.Update{
-				ExNames: exMan.GetSupportExchanges(),
-				Method:  exchange.TIME_TIGGER,
-				Time:    10 * time.Second,
-			}
-			exMan.UpdateExData(updateConfig)
-			break
-		case "test":
-			base := coin.Coin{
-				Code: "BTC",
-			}
-			target := coin.Coin{
-				Code: "ETH",
-			}
-			pair := pair.Pair{
-				Base:   &base,
-				Target: &target,
-			}
-			log.Println(pair)
+}
 
-			// okex.Socket(&pair)
-			// stex.Socket()
-			// bitfinex.Socket()
+func Init() {
+	e := InitExchange(exchange.KRAKEN)
+
+	coins := e.GetCoins()
+	e.UpdateAllBalances()
+
+	for _, coin := range coins {
+		balances := e.GetBalance(coin)
+		if balances > 0 {
+			log.Printf("Coin Balance %s: %f ", coin.Code, balances)
+			Test_AODepositAddress(e, coin)
 		}
 	}
 }
 
-func Init(source exchange.DataSource, sourceURI string) {
+func InitExchange(exName exchange.ExchangeName) exchange.Exchange {
 	coin.Init()
 	pair.Init()
-	if source == exchange.JSON_FILE {
-		utils.GetCommonDataFromJSON(sourceURI)
-	}
 	config := &exchange.Config{}
-	config.Source = source
-	config.SourceURI = sourceURI
+	config.Source = exchange.EXCHANGE_API
+	config.API_KEY = "U31c06G61OIMPi8lwMNHHhMKr6k+FhALjK8W4IEDTCbOjykuQUDGAlE6"
+	config.API_SECRET = "N2qzsRvOQ6d7Bmgl5riLT+PWnjR8jqqohg9TBqU+l+1JhFk5AGKU/ZytlVFk2k6bHibQ2SipdN8yAP5FzD6OPw=="
+	config.ExName = exName
 
-	InitKraken(config)
-	InitCoinbase(config)
-	// InitBitbns(config)
-}
+	inMan := initial.CreateInitManager()
+	e := inMan.Init(config)
+	log.Printf("Initial [ %v ] ", e.GetName())
 
-func InitKraken(config *exchange.Config) {
-	conf.Exchange(exchange.KRAKEN, config)
-	ex := kraken.CreateKraken(config)
-	log.Printf("Initial [ %12v ] ", ex.GetName())
+	config = nil
 
-	exMan := exchange.CreateExchangeManager()
-	exMan.Add(ex)
-}
-
-func InitCoinbase(config *exchange.Config) {
-	conf.Exchange(exchange.COINBASE, config)
-	ex := coinbase.CreateCoinbase(config)
-	log.Printf("Initial [ %12v ] ", ex.GetName())
-
-	exMan := exchange.CreateExchangeManager()
-	exMan.Add(ex)
+	return e
 }
