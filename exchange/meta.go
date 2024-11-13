@@ -162,6 +162,7 @@ const (
 	OKSIM        ExchangeName = "OKSIM"
 	OTCBTC       ExchangeName = "OTCBTC"
 	P2PB2B       ExchangeName = "P2PB2B"
+	PHEMEX       ExchangeName = "PHEMEX"
 	POLONIEX     ExchangeName = "POLONIEX"
 	PROBIT       ExchangeName = "PROBIT"
 	RIGHTBTC     ExchangeName = "RIGHTBTC"

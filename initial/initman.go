@@ -63,6 +63,7 @@ import (
 	"github.com/avinashpandit/crypto-agg/exchange/okexdm"
 	"github.com/avinashpandit/crypto-agg/exchange/oksim"
 	"github.com/avinashpandit/crypto-agg/exchange/otcbtc"
+	"github.com/avinashpandit/crypto-agg/exchange/phemex"
 	"github.com/avinashpandit/crypto-agg/exchange/poloniex"
 	"github.com/avinashpandit/crypto-agg/exchange/probit"
 	"github.com/avinashpandit/crypto-agg/exchange/stex"
@@ -277,6 +278,13 @@ func (e *InitManager) Init(config *exchange.Config) exchange.Exchange {
 
 	case exchange.KRAKEN:
 		ex := kraken.CreateKraken(config)
+		if ex != nil {
+			e.exMan.Add(ex)
+		}
+		return ex
+
+	case exchange.PHEMEX:
+		ex := phemex.CreatePhemex(config)
 		if ex != nil {
 			e.exMan.Add(ex)
 		}
