@@ -50,7 +50,8 @@ Step 1: Change Instance Name    (e *<exchange Instance Name>)
 Step 2: Add Model of API Response
 Step 3: Modify API Path(strRequestUrl)*/
 func (e *Phemex) GetCoinsData() error {
-	jsonResponse := &JSONResponse{}
+	jsonResponse := &JsonResponse{}
+	coinsData := &Data{}
 
 	strRequestUrl := "/public/products"
 	strUrl := API_URL + strRequestUrl
@@ -58,9 +59,15 @@ func (e *Phemex) GetCoinsData() error {
 	jsonCurrencyReturn := exchange.HttpGetRequest(strUrl, nil)
 	if err := json.Unmarshal([]byte(jsonCurrencyReturn), &jsonResponse); err != nil {
 		return fmt.Errorf("%s Get Coins Json Unmarshal Err: %v %v", e.GetName(), err, jsonCurrencyReturn)
+	} else if jsonResponse.Code != 0 {
+		return fmt.Errorf("%s Get Coins Failed: %v", e.GetName(), jsonResponse.Message)
 	}
 
-	for _, currency := range jsonResponse.Data.Currencies {
+	if err := json.Unmarshal(jsonResponse.Data, &coinsData); err != nil {
+		return fmt.Errorf("%s Get Coins Data Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
+	}
+
+	for _, currency := range coinsData.Currencies {
 		base := &coin.Coin{}
 		base = coin.GetCoin(currency.Currency)
 		if base == nil {
@@ -90,69 +97,38 @@ func (e *Phemex) GetCoinsData() error {
 		}
 
 	}
+
+	for _, product := range coinsData.Products {
+		if product.Type == "Perpetual" {
+			continue
+		}
+
+		p := &pair.Pair{}
+		currencies := strings.Split(product.DisplaySymbol, "/")
+		base := coin.GetCoin(strings.TrimSpace(currencies[0]))
+		target := coin.GetCoin(strings.TrimSpace(currencies[1]))
+		if base != nil && target != nil {
+			p = pair.GetPair(base, target)
+		}
+		pairConstraint := e.GetPairConstraint(p)
+		if pairConstraint == nil {
+			pairConstraint = &exchange.PairConstraint{
+				PairID:   p.ID,
+				Pair:     p,
+				ExSymbol: product.Symbol,
+				LotSize:  float64(product.PriceScale),
+				Listed:   DEFAULT_LISTED,
+			}
+		}
+		e.SetPairConstraint(pairConstraint)
+	}
+
 	return nil
+
 }
 
-/*
-	GetPairsData - Get Pairs Information (If API provide)
-
-Step 1: Change Instance Name    (e *<exchange Instance Name>)
-Step 2: Add Model of API Response
-Step 3: Modify API Path(strRequestUrl)
-*/
 func (e *Phemex) GetPairsData() error {
-	jsonResponse := &JSONResponse{}
-	pairsData := make(map[string]*PairsData)
 
-	strRequestUrl := "/open/api/v1/data/markets_info"
-	strUrl := API_URL + strRequestUrl
-
-	jsonSymbolsReturn := exchange.HttpGetRequest(strUrl, nil)
-	if err := json.Unmarshal([]byte(jsonSymbolsReturn), &jsonResponse); err != nil {
-		return fmt.Errorf("%s Get Pairs Json Unmarshal Err: %v %v", e.GetName(), err, jsonSymbolsReturn)
-	} else if jsonResponse.Code != 200 {
-		return fmt.Errorf("%s Get Pairs Failed: %v", e.GetName(), jsonResponse.Msg)
-	}
-	if err := json.Unmarshal(jsonResponse.Data, &pairsData); err != nil {
-		return fmt.Errorf("%s Get Pairs Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
-	}
-
-	for key, data := range pairsData {
-		symbols := strings.Split(key, "_")
-		p := &pair.Pair{}
-		switch e.Source {
-		case exchange.EXCHANGE_API:
-			base := coin.GetCoin(symbols[1])
-			target := coin.GetCoin(symbols[0])
-			if base != nil && target != nil {
-				p = pair.GetPair(base, target)
-			}
-		case exchange.JSON_FILE:
-			p = e.GetPairBySymbol(key)
-		}
-		if p != nil {
-			pairConstraint := e.GetPairConstraint(p)
-			if pairConstraint == nil {
-				pairConstraint = &exchange.PairConstraint{
-					PairID:      p.ID,
-					Pair:        p,
-					ExSymbol:    key,
-					MakerFee:    data.SellFeeRate,
-					TakerFee:    data.BuyFeeRate,
-					LotSize:     math.Pow10(-1 * data.QuantityScale),
-					PriceFilter: math.Pow10(-1 * data.PriceScale),
-					Listed:      DEFAULT_LISTED,
-				}
-			} else {
-				pairConstraint.ExSymbol = key
-				pairConstraint.MakerFee = data.SellFeeRate
-				pairConstraint.TakerFee = data.BuyFeeRate
-				pairConstraint.LotSize = math.Pow10(-1 * data.QuantityScale)
-				pairConstraint.PriceFilter = math.Pow10(-1 * data.PriceScale)
-			}
-			e.SetPairConstraint(pairConstraint)
-		}
-	}
 	return nil
 }
 
@@ -166,16 +142,17 @@ Step 5: Add Params - Depend on API request
 Step 6: Convert the response to Standard Maker struct
 */
 func (e *Phemex) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
-	jsonResponse := &JsonResponse{}
 	orderBook := OrderBook{}
 	symbol := e.GetSymbolByPair(pair)
 
-	strRequestUrl := "/open/api/v1/data/depth"
+	pairConstraint := e.GetPairConstraint(pair)
+
+	strRequestUrl := "/md/orderbook"
 	strUrl := API_URL + strRequestUrl
 
 	mapParams := make(map[string]string)
-	mapParams["depth"] = "150"
-	mapParams["market"] = symbol
+	//mapParams["depth"] = "10"
+	mapParams["symbol"] = symbol
 
 	maker := &exchange.Maker{
 		WorkerIP:        exchange.GetExternalIP(),
@@ -184,44 +161,26 @@ func (e *Phemex) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 	}
 
 	jsonOrderbook := exchange.HttpGetRequest(strUrl, mapParams)
-	if err := json.Unmarshal([]byte(jsonOrderbook), &jsonResponse); err != nil {
+	if err := json.Unmarshal([]byte(jsonOrderbook), &orderBook); err != nil {
 		return nil, fmt.Errorf("%s Get Orderbook Json Unmarshal Err: %v %v", e.GetName(), err, jsonOrderbook)
-	} else if jsonResponse.Code != 200 {
-		return nil, fmt.Errorf("%s Get Orderbook Failed: %v", e.GetName(), jsonOrderbook)
-	}
-	if err := json.Unmarshal(jsonResponse.Data, &orderBook); err != nil {
-		return nil, fmt.Errorf("%s Get Orderbook Data Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
 	}
 
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
-	var err error
-	for _, bid := range orderBook.Bids {
+	for _, bid := range orderBook.Result.Book.Bids {
 		var buydata exchange.Order
 
 		//Modify according to type and structure
-		buydata.Rate, err = strconv.ParseFloat(bid.Price, 64)
-		if err != nil {
-			return nil, err
-		}
-		buydata.Quantity, err = strconv.ParseFloat(bid.Quantity, 64)
-		if err != nil {
-			return nil, err
-		}
+		buydata.Rate = float64(bid[0]) / math.Pow(10, float64(pairConstraint.LotSize))
+		buydata.Quantity = float64(bid[1]) / math.Pow(10, float64(pairConstraint.LotSize))
 
 		maker.Bids = append(maker.Bids, buydata)
 	}
-	for _, ask := range orderBook.Asks {
+	for _, ask := range orderBook.Result.Book.Asks {
 		var selldata exchange.Order
 
 		//Modify according to type and structure
-		selldata.Rate, err = strconv.ParseFloat(ask.Price, 64)
-		if err != nil {
-			return nil, err
-		}
-		selldata.Quantity, err = strconv.ParseFloat(ask.Quantity, 64)
-		if err != nil {
-			return nil, err
-		}
+		selldata.Rate = float64(ask[0]) / math.Pow(10, float64(pairConstraint.LotSize))
+		selldata.Quantity = float64(ask[1]) / math.Pow(10, float64(pairConstraint.LotSize))
 
 		maker.Asks = append(maker.Asks, selldata)
 	}
@@ -384,9 +343,8 @@ func (e *Phemex) LimitSell(pair *pair.Pair, quantity, rate float64) (*exchange.O
 	jsonPlaceReturn := e.ApiKeyRequest("POST", strRequest, mapParams)
 	if err := json.Unmarshal([]byte(jsonPlaceReturn), &jsonResponse); err != nil {
 		return nil, fmt.Errorf("%s LimitSell Json Unmarshal Err: %v %v", e.GetName(), err, jsonPlaceReturn)
-	} else if jsonResponse.Code != 200 {
-		return nil, fmt.Errorf("%s LimitSell Failed: %s", e.GetName(), jsonPlaceReturn)
 	}
+
 	if err := json.Unmarshal([]byte(jsonPlaceReturn), &placeOrder); err != nil {
 		return nil, fmt.Errorf("%s LimitSell Data Unmarshal Err: %v %s", e.GetName(), err, jsonPlaceReturn)
 	}
@@ -423,9 +381,8 @@ func (e *Phemex) LimitBuy(pair *pair.Pair, quantity, rate float64) (*exchange.Or
 	jsonPlaceReturn := e.ApiKeyRequest("POST", strRequest, mapParams)
 	if err := json.Unmarshal([]byte(jsonPlaceReturn), &jsonResponse); err != nil {
 		return nil, fmt.Errorf("%s LimitBuy Json Unmarshal Err: %v %v", e.GetName(), err, jsonPlaceReturn)
-	} else if jsonResponse.Code != 200 {
-		return nil, fmt.Errorf("%s LimitBuy Failed: %s", e.GetName(), jsonPlaceReturn)
 	}
+
 	if err := json.Unmarshal([]byte(jsonPlaceReturn), &placeOrder); err != nil {
 		return nil, fmt.Errorf("%s LimitBuy Data Unmarshal Err: %v %s", e.GetName(), err, jsonPlaceReturn)
 	}
@@ -459,9 +416,8 @@ func (e *Phemex) OrderStatus(order *exchange.Order) error {
 	jsonOrderStatus := e.ApiKeyRequest("GET", strRequest, mapParams)
 	if err := json.Unmarshal([]byte(jsonOrderStatus), &jsonResponse); err != nil {
 		return fmt.Errorf("%s OrderStatus Json Unmarshal Err: %v %v", e.GetName(), err, jsonOrderStatus)
-	} else if jsonResponse.Code != 200 {
-		return fmt.Errorf("%s OrderStatus Failed: %v", e.GetName(), jsonResponse.Msg)
 	}
+
 	if err := json.Unmarshal([]byte(jsonOrderStatus), &orderStatus); err != nil {
 		return fmt.Errorf("%s OrderStatus Data Unmarshal Err: %v %s", e.GetName(), err, jsonOrderStatus)
 	}
@@ -497,17 +453,15 @@ func (e *Phemex) CancelOrder(order *exchange.Order) error {
 	}
 
 	jsonResponse := &JsonResponse{}
-	strRequest := "/open/api/v1/private/order"
+	strRequest := "/spot/orders"
 
 	mapParams := make(map[string]string)
-	mapParams["market"] = e.GetSymbolByPair(order.Pair)
-	mapParams["trade_no"] = order.OrderID
+	mapParams["symbol"] = e.GetSymbolByPair(order.Pair)
+	mapParams["orderID"] = order.OrderID
 
 	jsonCancelOrder := e.ApiKeyRequest("DELETE", strRequest, mapParams)
 	if err := json.Unmarshal([]byte(jsonCancelOrder), &jsonResponse); err != nil {
 		return fmt.Errorf("%s CancelOrder Json Unmarshal Err: %v %v", e.GetName(), err, jsonCancelOrder)
-	} else if jsonResponse.Code != 200 {
-		return fmt.Errorf("%s CancelOrder Failed: %v", e.GetName(), jsonResponse.Msg)
 	}
 
 	order.Status = exchange.Canceling

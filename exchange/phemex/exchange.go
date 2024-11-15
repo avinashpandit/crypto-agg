@@ -70,9 +70,6 @@ func (e *Phemex) InitData() error {
 		if err := e.GetCoinsData(); err != nil {
 			return err
 		}
-		if err := e.GetPairsData(); err != nil {
-			return err
-		}
 		break
 	case exchange.MICROSERVICE_API:
 		break
@@ -249,7 +246,7 @@ func (e *Phemex) GetConstraintFetchMethod(pair *pair.Pair) *exchange.ConstrainFe
 
 func (e *Phemex) UpdateConstraint() {
 	e.GetCoinsData()
-	e.GetPairsData()
+	//e.GetPairsData()
 }
 
 /**************** Coin Constraint ****************/

@@ -1,13 +1,15 @@
 package phemex
 
+import "encoding/json"
+
 // Copyright (c) 2015-2019 Bitontop Technologies Inc.
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-type JSONResponse struct {
-	Code string `json:"code"`
-	Msg  string `json:"msg"`
-	Data Data   `json:"data"`
+type JsonResponse struct {
+	Code    uint8           `json:"code"`
+	Message string          `json:"msg"`
+	Data    json.RawMessage `json:"data"`
 }
 
 type Data struct {
@@ -30,45 +32,37 @@ type Currency struct {
 	ValueScale      int    `json:"valueScale"`
 	MinValueEv      int    `json:"minValueEv"`
 	MaxValueEv      int    `json:"maxValueEv"`
-	NeedAddrTag     string `json:"needAddrTag"`
 	Status          string `json:"status"`
 	DisplayCurrency string `json:"displayCurrency"`
 	InAssetsDisplay int    `json:"inAssetsDisplay"`
-	Perpetual       string `json:"perpetual"`
-	StableCoin      string `json:"stableCoin"`
+	Perpetual       int    `json:"perpetual"`
+	StableCoin      int    `json:"stableCoin"`
 	AssetsPrecision int    `json:"assetsPrecision"`
 }
 
 type Product struct {
-	Symbol                   string `json:"symbol"`
-	Code                     int    `json:"code"`
-	Type                     string `json:"type"`
-	DisplaySymbol            string `json:"displaySymbol"`
-	IndexSymbol              string `json:"indexSymbol"`
-	MarkSymbol               string `json:"markSymbol"`
-	FundingRateSymbol        string `json:"fundingRateSymbol"`
-	FundingRate8hSymbol      string `json:"fundingRate8hSymbol"`
-	ContractUnderlyingAssets string `json:"contractUnderlyingAssets"`
-	SettleCurrency           string `json:"settleCurrency"`
-	QuoteCurrency            string `json:"quoteCurrency"`
-	ContractSize             int    `json:"contractSize"`
-	LotSize                  int    `json:"lotSize"`
-	TickSize                 int    `json:"tickSize"`
-	PriceScale               int    `json:"priceScale"`
-	RatioScale               int    `json:"ratioScale"`
-	PricePrecision           int    `json:"pricePrecision"`
-	MinPriceEp               int    `json:"minPriceEp"`
-	MaxPriceEp               int    `json:"maxPriceEp"`
-	MaxOrderQty              int    `json:"maxOrderQty"`
-	Description              string `json:"description"`
-	Status                   string `json:"status"`
-	TipOrderQty              int    `json:"tipOrderQty"`
-	ListTime                 int    `json:"listTime"`
-	MajorSymbol              bool   `json:"majorSymbol"`
-	DefaultLeverage          string `json:"defaultLeverage"`
-	FundingInterval          int    `json:"fundingInterval"`
-	MaxLeverage              int    `json:"maxLeverage"`
-	LeverageMargin           int    `json:"leverageMargin"`
+	Symbol                   string  `json:"symbol"`
+	Code                     int     `json:"code"`
+	Type                     string  `json:"type"`
+	DisplaySymbol            string  `json:"displaySymbol"`
+	IndexSymbol              string  `json:"indexSymbol"`
+	MarkSymbol               string  `json:"markSymbol"`
+	FundingRateSymbol        string  `json:"fundingRateSymbol"`
+	FundingRate8hSymbol      string  `json:"fundingRate8hSymbol"`
+	ContractUnderlyingAssets string  `json:"contractUnderlyingAssets"`
+	SettleCurrency           string  `json:"settleCurrency"`
+	QuoteCurrency            string  `json:"quoteCurrency"`
+	LotSize                  int64   `json:"lotSize"`
+	TickSize                 float64 `json:"tickSize"`
+	PriceScale               int64   `json:"priceScale"`
+	RatioScale               int64   `json:"ratioScale"`
+	PricePrecision           int64   `json:"pricePrecision"`
+	MinPriceEp               int64   `json:"minPriceEp"`
+	MaxPriceEp               int64   `json:"maxPriceEp"`
+	MaxOrderQty              int64   `json:"maxOrderQty"`
+	Status                   string  `json:"status"`
+	TipOrderQty              int64   `json:"tipOrderQty"`
+	Description              string  `json:"description"`
 }
 
 type PerpProductV2 struct {
@@ -84,27 +78,6 @@ type PerpProductV2 struct {
 	SettleCurrency           string `json:"settleCurrency"`
 	QuoteCurrency            string `json:"quoteCurrency"`
 	TickSize                 string `json:"tickSize"`
-	PriceScale               string `json:"priceScale"`
-	RatioScale               string `json:"ratioScale"`
-	PricePrecision           int    `json:"pricePrecision"`
-	BaseCurrency             string `json:"baseCurrency"`
-	Description              string `json:"description"`
-	Status                   string `json:"status"`
-	TipOrderQty              string `json:"tipOrderQty"`
-	ListTime                 int    `json:"listTime"`
-	MajorSymbol              bool   `json:"majorSymbol"`
-	DefaultLeverage          string `json:"defaultLeverage"`
-	FundingInterval          int    `json:"fundingInterval"`
-	MaxLeverage              int    `json:"maxLeverage"`
-	LeverageMargin           int    `json:"leverageMargin"`
-	MaxOrderQtyRq            string `json:"maxOrderQtyRq"`
-	MaxPriceRp               string `json:"maxPriceRp"`
-	MinOrderValueRv          string `json:"minOrderValueRv"`
-	MinPriceRp               string `json:"minPriceRp"`
-	QtyPrecision             int    `json:"qtyPrecision"`
-	QtyStepSize              string `json:"qtyStepSize"`
-	TipOrderQtyRq            string `json:"tipOrderQtyRq"`
-	MaxOpenPosLeverage       int    `json:"maxOpenPosLeverage"`
 }
 
 type RiskLimit struct {
@@ -124,7 +97,6 @@ type RiskLimitItem struct {
 type Leverage struct {
 	InitialMargin   string `json:"initialMargin"`
 	InitialMarginEr int    `json:"initialMarginEr"`
-	Options         []int  `json:"options"`
 }
 
 type RiskLimitV2 struct {
@@ -140,7 +112,6 @@ type RiskLimitV2Item struct {
 }
 
 type LeverageV2 struct {
-	Options         []int  `json:"options"`
 	InitialMarginRr string `json:"initialMarginRr"`
 }
 
@@ -150,21 +121,23 @@ type LeverageMargin struct {
 }
 
 type LeverageMarginItem struct {
-	NotionalValueRv         int    `json:"notionalValueRv"`
-	MaxLeverage             int    `json:"maxLeverage"`
-	MaintenanceMarginRateRr string `json:"maintenanceMarginRateRr"`
-	MaintenanceAmountRv     string `json:"maintenanceAmountRv"`
+	NotionalValueRv int `json:"notionalValueRv"`
 }
 
 type OrderBook struct {
-	Asks []struct {
-		Price    string `json:"price"`
-		Quantity string `json:"quantity"`
-	} `json:"asks"`
-	Bids []struct {
-		Price    string `json:"price"`
-		Quantity string `json:"quantity"`
-	} `json:"bids"`
+	Error  interface{} `json:"error"`
+	ID     int         `json:"id"`
+	Result struct {
+		Book struct {
+			Asks [][2]int64 `json:"asks"`
+			Bids [][2]int64 `json:"bids"`
+		} `json:"book"`
+		Depth     int    `json:"depth"`
+		Sequence  int64  `json:"sequence"`
+		Symbol    string `json:"symbol"`
+		Timestamp int64  `json:"timestamp"`
+		Type      string `json:"type"`
+	} `json:"result"`
 }
 
 type AccountBalances struct {

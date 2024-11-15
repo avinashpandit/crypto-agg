@@ -20,18 +20,40 @@ func main() {
 }
 
 func Init() {
-	e := InitExchange(exchange.KRAKEN)
+	e := InitExchange(exchange.PHEMEX)
 
 	coins := e.GetCoins()
-	e.UpdateAllBalances()
+	pairs := e.GetPairs()
+	log.Printf("%+v", pairs)
+	for _, coin := range coins {
+		pair := e.GetPairBySymbol("s" + coin.Code + "USDT")
+		log.Printf("%+v", pair)
+		maker, err := e.OrderBook(pair)
+		if err != nil {
+			log.Printf("OrderBook err: %v", err)
+		}
+
+		log.Printf("%+v", maker)
+	}
+
+	/*e.UpdateAllBalances()
 
 	for _, coin := range coins {
 		balances := e.GetBalance(coin)
 		if balances > 0 {
 			log.Printf("Coin Balance %s: %f ", coin.Code, balances)
-			Test_AODepositAddress(e, coin)
+			pair := e.GetPairBySymbol(coin.Code + "USD")
+			log.Printf("%+v", pair)
+			maker, err := e.OrderBook(pair)
+			if err != nil {
+				log.Printf("OrderBook err: %v", err)
+			}
+
+			log.Printf("%+v", maker)
+
+			//Test_AODepositAddress(e, coin)
 		}
-	}
+	}*/
 }
 
 func InitExchange(exName exchange.ExchangeName) exchange.Exchange {
@@ -39,8 +61,8 @@ func InitExchange(exName exchange.ExchangeName) exchange.Exchange {
 	pair.Init()
 	config := &exchange.Config{}
 	config.Source = exchange.EXCHANGE_API
-	config.API_KEY = "U31c06G61OIMPi8lwMNHHhMKr6k+FhALjK8W4IEDTCbOjykuQUDGAlE6"
-	config.API_SECRET = "N2qzsRvOQ6d7Bmgl5riLT+PWnjR8jqqohg9TBqU+l+1JhFk5AGKU/ZytlVFk2k6bHibQ2SipdN8yAP5FzD6OPw=="
+	//config.API_KEY = "U31c06G61OIMPi8lwMNHHhMKr6k+FhALjK8W4IEDTCbOjykuQUDGAlE6"
+	//config.API_SECRET = "N2qzsRvOQ6d7Bmgl5riLT+PWnjR8jqqohg9TBqU+l+1JhFk5AGKU/ZytlVFk2k6bHibQ2SipdN8yAP5FzD6OPw=="
 	config.ExName = exName
 
 	inMan := initial.CreateInitManager()
