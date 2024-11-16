@@ -207,7 +207,7 @@ func (e *Dragonex) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 	var err error
 	for _, bid := range orderBook.Buys {
-		var buydata exchange.Order
+		var buydata exchange.Quote
 
 		//Modify according to type and structure
 		buydata.Rate, err = strconv.ParseFloat(bid.Price, 64)
@@ -222,7 +222,7 @@ func (e *Dragonex) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 		maker.Bids = append(maker.Bids, buydata)
 	}
 	for _, ask := range orderBook.Sells {
-		var selldata exchange.Order
+		var selldata exchange.Quote
 
 		//Modify according to type and structure
 		selldata.Rate, err = strconv.ParseFloat(ask.Price, 64)

@@ -204,14 +204,14 @@ func (e *Deribit) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 
 	var err error
 	for _, bid := range orderBook.Bids {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 		buydata.Quantity = float64(bid[1])
 		buydata.Rate = float64(bid[0])
 		maker.Bids = append(maker.Bids, buydata)
 	}
 
 	for _, ask := range orderBook.Asks {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 		selldata.Quantity = float64(ask[1])
 		selldata.Rate = float64(ask[0])
 		maker.Asks = append(maker.Asks, selldata)

@@ -262,14 +262,14 @@ func (e *Okex) doSpotOrderBook(op *exchange.PublicOperation) error {
 
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 	for _, bid := range orderBook.Bids {
-		var buydata exchange.Order
+		var buydata exchange.Quote
 		buydata.Rate, _ = strconv.ParseFloat(bid[0], 64)
 		buydata.Quantity, _ = strconv.ParseFloat(bid[1], 64)
 
 		maker.Bids = append(maker.Bids, buydata)
 	}
 	for _, ask := range orderBook.Asks {
-		var selldata exchange.Order
+		var selldata exchange.Quote
 		selldata.Rate, _ = strconv.ParseFloat(ask[0], 64)
 		selldata.Quantity, _ = strconv.ParseFloat(ask[1], 64)
 

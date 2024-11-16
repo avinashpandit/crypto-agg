@@ -233,7 +233,7 @@ func (e *Kucoin) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 
 	for _, bid := range orderBook.Bids {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 
 		buydata.Rate, err = strconv.ParseFloat(bid[0], 64)
 		if err != nil {
@@ -249,7 +249,7 @@ func (e *Kucoin) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 	}
 
 	for i := len(orderBook.Asks) - 1; i >= 0; i-- {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 		selldata.Rate, err = strconv.ParseFloat(orderBook.Asks[i][0], 64)
 		if err != nil {
 			log.Printf("%s OrderBook strconv.ParseFloat  Rate error:%v", e.GetName(), err)

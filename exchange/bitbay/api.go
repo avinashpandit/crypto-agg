@@ -220,7 +220,7 @@ func (e *Bitbay) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 	var err error
 	for _, bid := range orderBook.Buy {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 		buydata.Quantity, err = strconv.ParseFloat(bid.Ca, 64)
 		if err != nil {
 			return nil, fmt.Errorf("%s OrderBook strconv.ParseFloat Quantity error:%v", e.GetName(), err)
@@ -233,7 +233,7 @@ func (e *Bitbay) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 		maker.Bids = append(maker.Bids, buydata)
 	}
 	for _, ask := range orderBook.Sell {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 		selldata.Quantity, err = strconv.ParseFloat(ask.Ca, 64)
 		if err != nil {
 			return nil, fmt.Errorf("%s OrderBook strconv.ParseFloat Quantity error:%v", e.GetName(), err)

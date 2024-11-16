@@ -219,7 +219,7 @@ func (e *Stex) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 	var err error
 	for _, bid := range orderBook.Bid {
-		var buydata exchange.Order
+		var buydata exchange.Quote
 
 		//Modify according to type and structure
 		buydata.Rate, err = strconv.ParseFloat(bid.Price, 64)
@@ -235,7 +235,7 @@ func (e *Stex) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 	}
 
 	for _, ask := range orderBook.Ask {
-		var selldata exchange.Order
+		var selldata exchange.Quote
 
 		//Modify according to type and structure
 		selldata.Rate, err = strconv.ParseFloat(ask.Price, 64)
@@ -304,7 +304,7 @@ func (e *Stex) webpageOrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 	var err error
 	for _, bid := range orderBookBuy {
-		var buydata exchange.Order
+		var buydata exchange.Quote
 
 		buydata.Rate, err = strconv.ParseFloat(bid.Price, 64)
 		if err != nil {
@@ -319,7 +319,7 @@ func (e *Stex) webpageOrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 	}
 
 	for _, ask := range orderBookSell {
-		var selldata exchange.Order
+		var selldata exchange.Quote
 
 		selldata.Rate, err = strconv.ParseFloat(ask.Price, 64)
 		if err != nil {

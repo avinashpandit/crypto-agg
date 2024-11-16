@@ -224,7 +224,7 @@ func (e *Tradeogre) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 	}
 	sort.Strings(buyRates)
 	for i := len(buyRates) - 1; i >= 0; i-- {
-		var buydata exchange.Order
+		var buydata exchange.Quote
 
 		buydata.Rate, err = strconv.ParseFloat(buyRates[i], 64)
 		if err != nil {
@@ -244,7 +244,7 @@ func (e *Tradeogre) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 	}
 	sort.Strings(sellRates)
 	for _, rate := range sellRates {
-		var selldata exchange.Order
+		var selldata exchange.Quote
 
 		selldata.Rate, err = strconv.ParseFloat(rate, 64)
 		if err != nil {

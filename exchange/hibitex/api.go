@@ -238,7 +238,7 @@ func (e *Hibitex) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 
 	var err error
 	for _, bid := range orderBook.Tick.Bids {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 
 		buydata.Quantity = bid[1]
 		buydata.Rate = bid[0]
@@ -247,7 +247,7 @@ func (e *Hibitex) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 	}
 
 	for _, ask := range orderBook.Tick.Asks {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 
 		selldata.Quantity = ask[1]
 		selldata.Rate = ask[0]

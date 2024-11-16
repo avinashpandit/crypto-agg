@@ -185,14 +185,14 @@ func (e *Okexdm) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 
 	var err error
 	for _, bid := range orderBook.Bids {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 		buydata.Quantity, _ = strconv.ParseFloat(bid[1], 64)
 		buydata.Rate, _ = strconv.ParseFloat(bid[0], 64)
 		maker.Bids = append(maker.Bids, buydata)
 	}
 
 	for _, ask := range orderBook.Asks {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 		selldata.Quantity, _ = strconv.ParseFloat(ask[1], 64)
 		selldata.Rate, _ = strconv.ParseFloat(ask[0], 64)
 		maker.Asks = append(maker.Asks, selldata)

@@ -206,7 +206,7 @@ func (e *Latoken) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 	for _, bid := range orderBook.Bids {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 
 		buydata.Quantity = bid.Amount
 		buydata.Rate = bid.Price
@@ -214,7 +214,7 @@ func (e *Latoken) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 		maker.Bids = append(maker.Bids, buydata)
 	}
 	for _, ask := range orderBook.Asks {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 
 		selldata.Quantity = ask.Amount
 		selldata.Rate = ask.Price

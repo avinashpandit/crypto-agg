@@ -78,14 +78,14 @@ func (e *Txbit) doSpotOrderBook(op *exchange.PublicOperation) error {
 
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 	for _, bid := range orderBook.Buy {
-		var buydata exchange.Order
+		var buydata exchange.Quote
 		buydata.Rate = bid.Rate
 		buydata.Quantity = bid.Quantity
 
 		maker.Bids = append(maker.Bids, buydata)
 	}
 	for i := len(orderBook.Sell) - 1; i >= 0; i-- {
-		var selldata exchange.Order
+		var selldata exchange.Quote
 
 		selldata.Rate = orderBook.Sell[i].Rate
 		selldata.Quantity = orderBook.Sell[i].Quantity

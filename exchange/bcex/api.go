@@ -229,7 +229,7 @@ func (e *Bcex) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 	var err error
 	for _, bid := range orderBook.Bids {
-		var buydata exchange.Order
+		var buydata exchange.Quote
 		buydata.Rate, err = strconv.ParseFloat(bid[0], 64)
 		if err != nil {
 			log.Printf("BCEX Bids OrderBook strconv Rate error:%v", err)
@@ -245,7 +245,7 @@ func (e *Bcex) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 		maker.Bids = append(maker.Bids, buydata)
 	}
 	for i := len(orderBook.Asks) - 1; i >= 0; i-- {
-		var selldata exchange.Order
+		var selldata exchange.Quote
 		selldata.Rate, err = strconv.ParseFloat(orderBook.Asks[i][0], 64)
 		if err != nil {
 			log.Printf("BCEX Asks OrderBook strconv Rate error:%v", err)

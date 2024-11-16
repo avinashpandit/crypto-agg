@@ -226,7 +226,7 @@ func (e *Bitmex) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 
 	for _, bid := range orderBook {
 		if bid.Side == "Buy" {
-			buydata := exchange.Order{}
+			buydata := exchange.Quote{}
 
 			buydata.Rate = bid.Price
 			buydata.Quantity = bid.Size / bid.Price
@@ -236,7 +236,7 @@ func (e *Bitmex) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 	}
 	for i := len(orderBook) - 1; i >= 0; i-- {
 		if orderBook[i].Side == "Sell" {
-			selldata := exchange.Order{}
+			selldata := exchange.Quote{}
 
 			selldata.Rate = orderBook[i].Price
 			selldata.Quantity = orderBook[i].Size / orderBook[i].Price

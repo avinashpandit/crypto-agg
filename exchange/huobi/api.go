@@ -243,7 +243,7 @@ func (e *Huobi) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 	for _, bid := range orderBook.Bids {
-		var buydata exchange.Order
+		var buydata exchange.Quote
 
 		buydata.Rate = bid[0]
 		buydata.Quantity = bid[1]
@@ -251,7 +251,7 @@ func (e *Huobi) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 		maker.Bids = append(maker.Bids, buydata)
 	}
 	for _, ask := range orderBook.Asks {
-		var selldata exchange.Order
+		var selldata exchange.Quote
 
 		selldata.Rate = ask[0]
 		selldata.Quantity = ask[1]

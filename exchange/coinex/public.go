@@ -232,7 +232,7 @@ func (e *Coinex) doSpotOrderBook(op *exchange.PublicOperation) error {
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 	var err error
 	for _, bid := range orderBook.Bids {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 
 		buydata.Rate, err = strconv.ParseFloat(bid[0], 64)
 		if err != nil {
@@ -247,7 +247,7 @@ func (e *Coinex) doSpotOrderBook(op *exchange.PublicOperation) error {
 	}
 
 	for _, ask := range orderBook.Asks {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 
 		selldata.Rate, err = strconv.ParseFloat(ask[0], 64)
 		if err != nil {

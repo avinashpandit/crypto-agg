@@ -33,7 +33,10 @@ func Init() {
 			log.Printf("OrderBook err: %v", err)
 		}
 
-		log.Printf("%+v", maker)
+		if len(maker.Bids) > 0 && len(maker.Asks) > 0 {
+			log.Printf("%+v %+v %+v", pair, maker.Bids[0], maker.Asks[0])
+		}
+
 	}
 
 	/*e.UpdateAllBalances()

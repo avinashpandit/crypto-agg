@@ -243,7 +243,7 @@ func (e *Hoo) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 
 	var err error
 	for _, bid := range orderBook.Bids {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 
 		buydata.Rate, err = strconv.ParseFloat(bid.Price, 64)
 		if err != nil {
@@ -258,7 +258,7 @@ func (e *Hoo) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 	}
 
 	for _, ask := range orderBook.Asks {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 
 		selldata.Rate, err = strconv.ParseFloat(ask.Price, 64)
 		if err != nil {

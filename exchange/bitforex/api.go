@@ -232,20 +232,20 @@ func (e *Bitforex) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 	for _, bid := range orderBook.Bids {
-		var buydata exchange.Order
+		var buydata exchange.Quote
 		buydata.Quantity = bid.Amount
 		buydata.Rate = bid.Price
 		maker.Bids = append(maker.Bids, buydata)
 	}
 	for _, ask := range orderBook.Asks {
-		var buydata exchange.Order
+		var buydata exchange.Quote
 		buydata.Quantity = ask.Amount
 		buydata.Rate = ask.Price
 		maker.Asks = append(maker.Asks, buydata)
 	}
 
 	// for i := len(orderBook.Asks) - 1; i > 0; i-- {
-	// 	var selldata exchange.Order
+	// 	var selldata exchange.Quote
 	// 	selldata.Quantity = orderBook.Asks[i].Amount
 	// 	selldata.Rate = orderBook.Asks[i].Price
 	// 	maker.Asks = append(maker.Asks, selldata)

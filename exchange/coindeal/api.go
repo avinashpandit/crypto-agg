@@ -209,7 +209,7 @@ func (e *Coindeal) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 	var err error
 	//买入
 	for _, bid := range orderBook.Bids {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 		buydata.Quantity, err = strconv.ParseFloat(bid.Amount, 64)
 		if err != nil {
 			return nil, fmt.Errorf("%s OrderBook strconv.ParseFloat Quantity error:%v\n", e.GetName(), err)
@@ -225,7 +225,7 @@ func (e *Coindeal) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 
 	//卖出
 	for _, ask := range orderBook.Asks {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 		selldata.Quantity, err = strconv.ParseFloat(ask.Amount, 64)
 		if err != nil {
 			return nil, fmt.Errorf("%s OrderBook strconv.ParseFloat Quantity error:%v\n", e.GetName(), err)

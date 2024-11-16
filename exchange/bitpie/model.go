@@ -106,6 +106,6 @@ type PlaceOrder struct {
 }
 
 type OrderBook struct {
-	Buy  []exchange.Order `json:"buy"`
-	Sell []exchange.Order `json:"sell"`
+	Buy  []exchange.Quote `json:"buy"`
+	Sell []exchange.Quote `json:"sell"`
 }

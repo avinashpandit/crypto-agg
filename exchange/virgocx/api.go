@@ -233,7 +233,7 @@ func (e *Virgocx) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 	for _, bid := range orderBook.Bids {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 
 		buydata.Quantity = bid.Qty
 		buydata.Rate = bid.Price
@@ -241,7 +241,7 @@ func (e *Virgocx) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 		maker.Bids = append(maker.Bids, buydata)
 	}
 	for i := len(orderBook.Asks) - 1; i >= 0; i-- {
-		var selldata exchange.Order
+		var selldata exchange.Quote
 
 		selldata.Rate = orderBook.Asks[i].Price
 		selldata.Quantity = orderBook.Asks[i].Qty

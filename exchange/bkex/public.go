@@ -71,14 +71,14 @@ func (e *Bkex) doSpotOrderBook(op *exchange.PublicOperation) error {
 
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 	for _, bid := range orderBook.Bids {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 		buydata.Quantity = bid.Amt
 		buydata.Rate = bid.Price
 		maker.Bids = append(maker.Bids, buydata)
 	}
 
 	for _, ask := range orderBook.Asks {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 		selldata.Quantity = ask.Amt
 		selldata.Rate = ask.Price
 		maker.Asks = append(maker.Asks, selldata)

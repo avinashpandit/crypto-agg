@@ -246,7 +246,7 @@ func (e *Cointiger) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 
 	var err error
 	for _, bid := range orderBook.DepthData.Tick.Buys {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 		buydata.Quantity, err = strconv.ParseFloat(fmt.Sprintf("%v", bid[1]), 64)
 		if err != nil {
 			return nil, err
@@ -259,7 +259,7 @@ func (e *Cointiger) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 	}
 
 	for _, ask := range orderBook.DepthData.Tick.Asks {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 		selldata.Quantity, err = strconv.ParseFloat(fmt.Sprintf("%v", ask[1]), 64)
 		if err != nil {
 			return nil, err

@@ -61,7 +61,7 @@ func (e *Bitfinex) doSpotOrderBook(op *exchange.PublicOperation) error {
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 	var err error
 	for _, bid := range orderBook.Bids {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 		buydata.Quantity, err = strconv.ParseFloat(bid.Amount, 64)
 		if err != nil {
 			return fmt.Errorf("%s OrderBook strconv.ParseFloat Quantity error:%v", e.GetName(), err)
@@ -75,7 +75,7 @@ func (e *Bitfinex) doSpotOrderBook(op *exchange.PublicOperation) error {
 	}
 
 	for _, ask := range orderBook.Asks {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 		selldata.Quantity, err = strconv.ParseFloat(ask.Amount, 64)
 		if err != nil {
 			return fmt.Errorf("%s OrderBook strconv.ParseFloat Quantity error:%v", e.GetName(), err)

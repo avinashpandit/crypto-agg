@@ -62,7 +62,7 @@ func (e *Gateio) doSpotOrderBook(op *exchange.PublicOperation) error {
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 	var err error
 	for _, bid := range orderBook.Bids {
-		var buydata exchange.Order
+		var buydata exchange.Quote
 
 		//Modify according to type and structure
 		buydata.Rate, err = strconv.ParseFloat(bid[0], 64)
@@ -77,7 +77,7 @@ func (e *Gateio) doSpotOrderBook(op *exchange.PublicOperation) error {
 		maker.Bids = append(maker.Bids, buydata)
 	}
 	for _, ask := range orderBook.Asks {
-		var selldata exchange.Order
+		var selldata exchange.Quote
 
 		//Modify according to type and structure
 		selldata.Rate, err = strconv.ParseFloat(ask[0], 64)

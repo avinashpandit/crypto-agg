@@ -194,14 +194,14 @@ func (e *HuobiOTC) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 
 			if side == 0 {
 				for _, ask := range orderBook {
-					selldata := exchange.Order{}
+					selldata := exchange.Quote{}
 					selldata.Quantity = ask.TradeCount
 					selldata.Rate = ask.Price
 					maker.Asks = append(maker.Asks, selldata)
 				}
 			} else if side == 1 {
 				for _, bid := range orderBook {
-					buydata := exchange.Order{}
+					buydata := exchange.Quote{}
 					buydata.Quantity = bid.TradeCount
 					buydata.Rate = bid.Price
 					maker.Bids = append(maker.Bids, buydata)

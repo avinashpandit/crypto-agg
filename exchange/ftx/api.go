@@ -209,7 +209,7 @@ func (e *Ftx) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 	for _, bid := range orderBook.Bids {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 		buydata.Quantity = bid[1]
 		buydata.Rate = bid[0]
 
@@ -217,7 +217,7 @@ func (e *Ftx) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 	}
 
 	for _, ask := range orderBook.Asks {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 		selldata.Quantity = ask[1]
 		selldata.Rate = ask[0]
 		maker.Asks = append(maker.Asks, selldata)

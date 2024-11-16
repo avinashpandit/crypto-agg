@@ -206,7 +206,7 @@ func (e *Probit) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 	var err error
 	for _, order := range orderBook.Data {
 		if order.Side == "buy" {
-			buydata := exchange.Order{}
+			buydata := exchange.Quote{}
 			buydata.Quantity, err = strconv.ParseFloat(order.Quantity, 64)
 			if err != nil {
 				return nil, fmt.Errorf("%s OrderBook strconv.ParseFloat Quantity error:%v", e.GetName(), err)
@@ -218,7 +218,7 @@ func (e *Probit) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 			}
 			maker.Bids = append(maker.Bids, buydata)
 		} else if order.Side == "sell" {
-			selldata := exchange.Order{}
+			selldata := exchange.Quote{}
 			selldata.Quantity, err = strconv.ParseFloat(order.Quantity, 64)
 			if err != nil {
 				return nil, fmt.Errorf("%s OrderBook strconv.ParseFloat Quantity error:%v", e.GetName(), err)

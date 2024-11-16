@@ -167,7 +167,7 @@ func (e *Phemex) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 	for _, bid := range orderBook.Result.Book.Bids {
-		var buydata exchange.Order
+		var buydata exchange.Quote
 
 		//Modify according to type and structure
 		buydata.Rate = float64(bid[0]) / math.Pow(10, float64(pairConstraint.LotSize))
@@ -176,7 +176,7 @@ func (e *Phemex) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 		maker.Bids = append(maker.Bids, buydata)
 	}
 	for _, ask := range orderBook.Result.Book.Asks {
-		var selldata exchange.Order
+		var selldata exchange.Quote
 
 		//Modify according to type and structure
 		selldata.Rate = float64(ask[0]) / math.Pow(10, float64(pairConstraint.LotSize))

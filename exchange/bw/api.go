@@ -232,14 +232,14 @@ func (e *Bw) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 
 	var err error
 	for _, bid := range orderBook.Bids {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 		buydata.Quantity, _ = strconv.ParseFloat(bid[1], 64)
 		buydata.Rate, _ = strconv.ParseFloat(bid[0], 64)
 		maker.Bids = append(maker.Bids, buydata)
 	}
 
 	for i := len(orderBook.Asks) - 1; i > 0; i-- {
-		var selldata exchange.Order
+		var selldata exchange.Quote
 		selldata.Quantity, _ = strconv.ParseFloat(orderBook.Asks[i][1], 64)
 		selldata.Rate, _ = strconv.ParseFloat(orderBook.Asks[i][0], 64)
 		maker.Asks = append(maker.Asks, selldata)

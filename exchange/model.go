@@ -91,6 +91,11 @@ const (
 	Other     OrderStatus = "Other"
 )
 
+type Quote struct {
+	Rate     float64 `bson:"Rate"`
+	Quantity float64 `bson:"Quantity"`
+}
+
 type Order struct {
 	EX            ExchangeName
 	Pair          *pair.Pair
@@ -121,8 +126,8 @@ type Maker struct {
 	Timestamp       float64    `bson:"timestamp"`
 	Nounce          int        `bson:"nounce"`
 	LastUpdateID    int64      `json:"lastUpdateId"`
-	Bids            []Order    `json:"bids"`
-	Asks            []Order    `json:"asks"`
+	Bids            []Quote    `json:"bids"`
+	Asks            []Quote    `json:"asks"`
 }
 
 type Margin struct {

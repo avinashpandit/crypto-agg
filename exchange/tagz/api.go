@@ -227,7 +227,7 @@ func (e *Tagz) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 	maker.AfterTimestamp = float64(time.Now().UnixNano() / 1e6)
 
 	// for _, bid := range orderBook.Bids {
-	// 	buydata := exchange.Order{}
+	// 	buydata := exchange.Quote{}
 
 	// 	buydata.Rate = bid.Price
 	// 	buydata.Quantity = bid.Amount
@@ -236,7 +236,7 @@ func (e *Tagz) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 	// }
 
 	for i := len(orderBook.Bids) - 1; i >= 0; i-- {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 
 		buydata.Rate = orderBook.Bids[i].Price
 		buydata.Quantity = orderBook.Bids[i].Amount
@@ -245,7 +245,7 @@ func (e *Tagz) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 	}
 
 	for _, ask := range orderBook.Asks {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 
 		selldata.Rate = ask.Price
 		selldata.Quantity = ask.Amount
@@ -254,7 +254,7 @@ func (e *Tagz) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 	}
 
 	// for i := len(orderBook.Asks) - 1; i >= 0; i-- {
-	// 	selldata := exchange.Order{}
+	// 	selldata := exchange.Quote{}
 
 	// 	selldata.Rate = strconv.ParseFloat(orderBook.Asks[i][0], 64)
 	// 	selldata.Quantity, err = strconv.ParseFloat(orderBook.Asks[i][1], 64)

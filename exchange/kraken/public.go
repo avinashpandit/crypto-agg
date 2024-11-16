@@ -135,7 +135,7 @@ func (e *Kraken) doSpotOrderBook(op *exchange.PublicOperation) error {
 	var err error
 	for _, book := range orderBook {
 		for _, bid := range book.Bids {
-			buydata := exchange.Order{}
+			buydata := exchange.Quote{}
 			buydata.Quantity, err = strconv.ParseFloat(bid[1].(string), 64)
 			if err != nil {
 				return fmt.Errorf("%s OrderBook strconv.ParseFloat Quantity error:%v", e.GetName(), err)
@@ -149,7 +149,7 @@ func (e *Kraken) doSpotOrderBook(op *exchange.PublicOperation) error {
 		}
 
 		for _, ask := range book.Asks {
-			selldata := exchange.Order{}
+			selldata := exchange.Quote{}
 			selldata.Quantity, err = strconv.ParseFloat(ask[1].(string), 64)
 			if err != nil {
 				return fmt.Errorf("%s OrderBook strconv.ParseFloat Quantity error:%v", e.GetName(), err)

@@ -203,7 +203,7 @@ func (e *Bitmax) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 
 	var err error
 	for _, bid := range orderBook.Bids {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 		buydata.Rate, err = strconv.ParseFloat(bid[0], 64)
 		if err != nil {
 			return nil, err
@@ -215,7 +215,7 @@ func (e *Bitmax) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 		maker.Bids = append(maker.Bids, buydata)
 	}
 	for _, ask := range orderBook.Asks {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 		selldata.Rate, err = strconv.ParseFloat(ask[0], 64)
 		if err != nil {
 			return nil, err

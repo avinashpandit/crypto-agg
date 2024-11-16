@@ -340,7 +340,7 @@ func (e *Binance) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 
 	var err error
 	for _, bid := range orderBook.Bids {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 		buydata.Quantity, err = strconv.ParseFloat(bid[1].(string), 64)
 		if err != nil {
 			return nil, fmt.Errorf("%s OrderBook strconv.ParseFloat Quantity error:%v", e.GetName(), err)
@@ -354,7 +354,7 @@ func (e *Binance) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 	}
 
 	for _, ask := range orderBook.Asks {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 		selldata.Quantity, err = strconv.ParseFloat(ask[1].(string), 64)
 		if err != nil {
 			return nil, fmt.Errorf("%s OrderBook strconv.ParseFloat Quantity error:%v", e.GetName(), err)

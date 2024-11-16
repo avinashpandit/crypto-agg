@@ -99,7 +99,7 @@ func (e *Bitstamp) doSpotOrderBook(op *exchange.PublicOperation) error {
 
 	var err error
 	for _, bid := range orderBook.Bids {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 
 		//Modify according to type and structure
 		buydata.Rate, err = strconv.ParseFloat(bid[0], 64)
@@ -114,7 +114,7 @@ func (e *Bitstamp) doSpotOrderBook(op *exchange.PublicOperation) error {
 		maker.Bids = append(maker.Bids, buydata)
 	}
 	for _, ask := range orderBook.Asks {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 
 		//Modify according to type and structure
 		selldata.Rate, err = strconv.ParseFloat(ask[0], 64)

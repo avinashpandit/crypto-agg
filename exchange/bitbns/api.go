@@ -226,14 +226,14 @@ func (e *Bitbns) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 
 	var err error
 	for _, bid := range buyOrderBook {
-		buydata := exchange.Order{}
+		buydata := exchange.Quote{}
 		buydata.Quantity = bid.Btc
 		buydata.Rate = bid.Rate
 		maker.Bids = append(maker.Bids, buydata)
 	}
 
 	for _, ask := range sellOrderBook {
-		selldata := exchange.Order{}
+		selldata := exchange.Quote{}
 		selldata.Quantity = ask.Btc
 		selldata.Rate = ask.Rate
 		maker.Asks = append(maker.Asks, selldata)
