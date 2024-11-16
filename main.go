@@ -27,7 +27,6 @@ func Init() {
 	log.Printf("%+v", pairs)
 	for _, coin := range coins {
 		pair := e.GetPairBySymbol("s" + coin.Code + "USDT")
-		log.Printf("%+v", pair)
 		maker, err := e.OrderBook(pair)
 		if err != nil {
 			log.Printf("OrderBook err: %v", err)
