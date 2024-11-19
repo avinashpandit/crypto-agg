@@ -6,26 +6,48 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"runtime"
+	"sync"
+	"syscall"
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
 	"github.com/avinashpandit/crypto-agg/initial"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 )
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Llongfile)
+	// create wait group
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
 	Init()
 
+	go func() {
+		sigs := make(chan os.Signal, 1)
+		signal.Notify(sigs, syscall.SIGQUIT)
+		buf := make([]byte, 1<<20)
+		for {
+			<-sigs
+			stacklen := runtime.Stack(buf, true)
+			logger.Info().Msgf("=== received SIGQUIT ===\n*** goroutine dump...\n%s\n*** end\n", buf[:stacklen])
+		}
+	}()
+
+	wg.Wait()
 }
 
 func Init() {
-	var ex []exchange.Exchange = make([]exchange.Exchange, 3)
-	ex[0] = InitExchange(exchange.PHEMEX)
-	ex[1] = InitExchange(exchange.KRAKEN)
+	var ex []exchange.Exchange = make([]exchange.Exchange, 1)
+	ex[0] = InitExchange(exchange.BYBIT)
+	/*ex[1] = InitExchange(exchange.KRAKEN)
 	//ex[2] = InitExchange(exchange.KUCOIN)
 	ex[2] = InitExchange(exchange.COINBASE)
-
+	*/
 	/*
 		coins := e.GetCoins()
 		pairs := e.GetPairs()

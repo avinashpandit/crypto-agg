@@ -60,6 +60,13 @@ func CreateBybit(config *exchange.Config) *Bybit {
 			log.Printf("%v", err)
 			instance = nil
 		}
+
+		ws := NewBybitPublicWebSocket("wss://stream.bybit.com/v5/public/spot", func(message string) error {
+			fmt.Println("Received:", message)
+			return nil
+		})
+		_, _ = ws.Connect().SendSubscription([]string{"tickers.BTCUSDT", "tickers.ETHUSDT"})
+
 	})
 	return instance
 }
