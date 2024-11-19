@@ -20,22 +20,59 @@ func main() {
 }
 
 func Init() {
-	e := InitExchange(exchange.PHEMEX)
+	var ex []exchange.Exchange = make([]exchange.Exchange, 3)
+	ex[0] = InitExchange(exchange.PHEMEX)
+	ex[1] = InitExchange(exchange.KRAKEN)
+	//ex[2] = InitExchange(exchange.KUCOIN)
+	ex[2] = InitExchange(exchange.COINBASE)
 
-	coins := e.GetCoins()
-	pairs := e.GetPairs()
-	log.Printf("%+v", pairs)
-	for _, coin := range coins {
-		pair := e.GetPairBySymbol("s" + coin.Code + "USDT")
-		maker, err := e.OrderBook(pair)
+	/*
+		coins := e.GetCoins()
+		pairs := e.GetPairs()
+		log.Printf("%+v", pairs)
+		for _, coin := range coins {
+			pair := e.GetPairBySymbol("s" + coin.Code + "USDT")
+			maker, err := e.OrderBook(pair)
+			if err != nil {
+				log.Printf("OrderBook err: %v", err)
+			}
+
+			if len(maker.Bids) > 0 && len(maker.Asks) > 0 {
+				log.Printf("%+v %+v %+v", pair, maker.Bids[0], maker.Asks[0])
+			}
+
+		}
+	*/
+
+	/*	coins := e.GetCoins()
+		e.UpdateAllBalances()
+
+		for _, coin := range coins {
+			balances := e.GetBalance(coin)
+			if balances > 0 {
+				log.Printf("Coin Balance %s: %f ", coin.Code, balances)
+				Test_AODepositAddress(e, coin)
+			}
+		}
+	*/
+	for _, e := range ex {
+		baseCcy := "SOL"
+		quoteCcy := "USDT"
+		var pair1 *pair.Pair
+		if e.GetName() == "KRAKEN" {
+			quoteCcy = "USD"
+			pair1 = pair.GetPairByKey(quoteCcy + "|" + baseCcy)
+		} else {
+			pair1 = pair.GetPairByKey(baseCcy + "|" + quoteCcy)
+		}
+		maker, err := e.OrderBook(pair1)
 		if err != nil {
 			log.Printf("OrderBook err: %v", err)
 		}
 
-		if len(maker.Bids) > 0 && len(maker.Asks) > 0 {
-			log.Printf("%+v %+v %+v", pair, maker.Bids[0], maker.Asks[0])
+		if maker != nil && len(maker.Bids) > 0 && len(maker.Asks) > 0 {
+			log.Printf("%+v %+v %+v", pair1, maker.Bids[0], maker.Asks[0])
 		}
-
 	}
 
 	/*e.UpdateAllBalances()
