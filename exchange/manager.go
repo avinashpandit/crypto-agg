@@ -36,7 +36,7 @@ type Exchange interface {
 	GetSymbolByCoin(coin *coin.Coin) string
 	DeleteCoin(coin *coin.Coin)
 
-	SubscribeAndProcessWebsocketMessage(symbols []string, messageHandler func(message string) error)
+	SubscribeAndProcessWebsocketMessage(pairs []pair.Pair, messageHandler func(message string) error)
 
 	/***** Pair Information *****/
 	GetPairConstraint(pair *pair.Pair) *PairConstraint

@@ -318,11 +318,18 @@ func (e *Bybit) GetPriceFilter(pair *pair.Pair) float64 {
 	return pairConstraint.PriceFilter
 }
 
-func (b *Bybit) SubscribeAndProcessWebsocketMessage(symbols []string, messageHandler func(message string) error) {
+func (b *Bybit) SubscribeAndProcessWebsocketMessage(pairs []pair.Pair, messageHandler func(message string) error) {
 	b.SetMessageHandler(messageHandler)
 
-	for _, symbol := range symbols {
-		args := []string{"tickers." + symbol}
+	for _, pair := range pairs {
+		symbol := b.GetSymbolByPair(&pair)
+		var args []string
+		if symbol == "" {
+			args = []string{"tickers." + pair.Target.Code + pair.Base.Code}
+		} else {
+			args = []string{"tickers." + symbol}
+		}
+
 		_, err := b.SendSubscription(args)
 		if err != nil {
 			fmt.Println("Failed to send subscription:", err)

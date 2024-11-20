@@ -39,6 +39,7 @@ var balanceMap cmap.ConcurrentMap
 
 var instance *Kraken
 var once sync.Once
+var reqID = 1
 
 /***************************************************/
 func CreateKraken(config *exchange.Config) *Kraken {
@@ -319,11 +320,13 @@ func (e *Kraken) GetPriceFilter(pair *pair.Pair) float64 {
 	return pairConstraint.PriceFilter
 }
 
-func (b *Kraken) SubscribeAndProcessWebsocketMessage(symbols []string, messageHandler func(message string) error) {
+func (b *Kraken) SubscribeAndProcessWebsocketMessage(pairs []pair.Pair, messageHandler func(message string) error) {
 	b.SetMessageHandler(messageHandler)
 
-	for _, symbol := range symbols {
-		args := []string{"tickers." + symbol}
+	for _, pair := range pairs {
+		fmt.Println("symbol:", pair.Name)
+
+		args := []string{pair.Target.Code + "/" + pair.Base.Code}
 		_, err := b.SendSubscription(args)
 		if err != nil {
 			fmt.Println("Failed to send subscription:", err)
@@ -332,19 +335,22 @@ func (b *Kraken) SubscribeAndProcessWebsocketMessage(symbols []string, messageHa
 	}
 }
 
-/*
 func (b *Kraken) SendSubscription(args []string) (*exchange.WebSocketHandler, error) {
-	reqID := uuid.New().String()
 	subMessage := map[string]interface{}{
+		"method": "subscribe",
+		"params": map[string]interface{}{
+			"channel":       "ticker",
+			"symbol":        args,
+			"event_trigger": "bbo",
+			"snapshot":      true,
+		},
 		"req_id": reqID,
-		"op":     "subscribe",
-		"args":   args,
 	}
-	fmt.Println("subscribe msg:", fmt.Sprintf("%v", subMessage["args"]))
-	if err := b.WebSocketHandler.sendAsJson(subMessage); err != nil {
+	fmt.Println("subscribe msg:", fmt.Sprintf("%v", subMessage))
+	if err := b.WebSocketHandler.SendAsJson(subMessage); err != nil {
 		fmt.Println("Failed to send subscription:", err)
 		return b.WebSocketHandler, err
 	}
 	fmt.Println("Subscription sent successfully.")
 	return b.WebSocketHandler, nil
-}*/
+}

@@ -43,12 +43,12 @@ func main() {
 }
 
 func Init() {
-	var ex []exchange.Exchange = make([]exchange.Exchange, 1)
+	var ex []exchange.Exchange = make([]exchange.Exchange, 2)
 	ex[0] = InitExchange(exchange.BYBIT)
-	/*ex[1] = InitExchange(exchange.KRAKEN)
+	ex[1] = InitExchange(exchange.KRAKEN)
 	//ex[2] = InitExchange(exchange.KUCOIN)
-	ex[2] = InitExchange(exchange.COINBASE)
-	*/
+	/*ex[2] = InitExchange(exchange.COINBASE)
+	 */
 	/*
 		coins := e.GetCoins()
 		pairs := e.GetPairs()
@@ -83,18 +83,21 @@ func Init() {
 		baseCcy := "SOL"
 		quoteCcy := "USDT"
 
-		e.SubscribeAndProcessWebsocketMessage([]string{baseCcy + quoteCcy}, func(message string) error {
+		var pair1 *pair.Pair
+		pair1 = pair.GetPairByKey(baseCcy + "|" + quoteCcy)
+		if pair1 == nil {
+			pair1 = pair.GetPairByKey(quoteCcy + "|" + baseCcy)
+			if pair1 == nil {
+				quoteCcy = "USD"
+				pair1 = pair.GetPairByKey(quoteCcy + "|" + baseCcy)
+			}
+		}
+
+		e.SubscribeAndProcessWebsocketMessage([]pair.Pair{*pair1}, func(message string) error {
 			fmt.Println("Received:", message)
 			return nil
 		})
 
-		var pair1 *pair.Pair
-		if e.GetName() == "KRAKEN" {
-			quoteCcy = "USD"
-			pair1 = pair.GetPairByKey(quoteCcy + "|" + baseCcy)
-		} else {
-			pair1 = pair.GetPairByKey(baseCcy + "|" + quoteCcy)
-		}
 		maker, err := e.OrderBook(pair1)
 		if err != nil {
 			log.Printf("OrderBook err: %v", err)

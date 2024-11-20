@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/avinashpandit/crypto-agg/pair"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
@@ -151,7 +152,7 @@ func (b *WebSocketHandler) SendSubscription(args []string) (*WebSocketHandler, e
 		"args":   args,
 	}
 	fmt.Println("subscribe msg:", fmt.Sprintf("%v", subMessage["args"]))
-	if err := b.sendAsJson(subMessage); err != nil {
+	if err := b.SendAsJson(subMessage); err != nil {
 		fmt.Println("Failed to send subscription:", err)
 		return b, err
 	}
@@ -171,7 +172,7 @@ func (b *WebSocketHandler) sendRequest(op string, args map[string]interface{}, h
 	fmt.Println("request headers:", fmt.Sprintf("%v", request["header"]))
 	fmt.Println("request op channel:", fmt.Sprintf("%v", request["op"]))
 	fmt.Println("request msg:", fmt.Sprintf("%v", request["args"]))
-	return b.sendAsJson(request)
+	return b.SendAsJson(request)
 }
 
 func ping(b *WebSocketHandler) {
@@ -237,10 +238,10 @@ func (b *WebSocketHandler) sendAuth() error {
 		"args":   []interface{}{b.apiKey, expires, signature},
 	}
 	fmt.Println("auth args:", fmt.Sprintf("%v", authMessage["args"]))
-	return b.sendAsJson(authMessage)
+	return b.SendAsJson(authMessage)
 }
 
-func (b *WebSocketHandler) sendAsJson(v interface{}) error {
+func (b *WebSocketHandler) SendAsJson(v interface{}) error {
 	data, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -261,11 +262,11 @@ func PublicWebSocketHandlerInit(handler MessageHandler) *WebSocketHandler {
 	return c
 }
 
-func (b *WebSocketHandler) SubscribeAndProcessWebsocketMessage(symbols []string, messageHandler func(message string) error) {
+func (b *WebSocketHandler) SubscribeAndProcessWebsocketMessage(pairs []pair.Pair, messageHandler func(message string) error) {
 	b.SetMessageHandler(messageHandler)
 
-	for _, symbol := range symbols {
-		args := []string{symbol}
+	for _, pair := range pairs {
+		args := []string{pair.Name}
 		_, err := b.SendSubscription(args)
 		if err != nil {
 			fmt.Println("Failed to send subscription:", err)
