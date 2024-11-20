@@ -20,6 +20,7 @@ import (
 )
 
 type Kraken struct {
+	*exchange.WebSocketHandler
 	ID      int
 	Name    string `bson:"name"`
 	Website string `bson:"website"`
@@ -52,6 +53,10 @@ func CreateKraken(config *exchange.Config) *Kraken {
 			Two_Factor: config.Two_Factor,
 			Source:     config.Source,
 			SourceURI:  config.SourceURI,
+			WebSocketHandler: &exchange.WebSocketHandler{
+				URL:          "wss://ws.kraken.com/v2",
+				PingInterval: 20,
+			},
 		}
 
 		balanceMap = cmap.New()
@@ -62,6 +67,8 @@ func CreateKraken(config *exchange.Config) *Kraken {
 			log.Printf("%v", err)
 			instance = nil
 		}
+
+		_ = instance.Connect()
 	})
 	return instance
 }
@@ -311,3 +318,33 @@ func (e *Kraken) GetPriceFilter(pair *pair.Pair) float64 {
 	}
 	return pairConstraint.PriceFilter
 }
+
+func (b *Kraken) SubscribeAndProcessWebsocketMessage(symbols []string, messageHandler func(message string) error) {
+	b.SetMessageHandler(messageHandler)
+
+	for _, symbol := range symbols {
+		args := []string{"tickers." + symbol}
+		_, err := b.SendSubscription(args)
+		if err != nil {
+			fmt.Println("Failed to send subscription:", err)
+			return
+		}
+	}
+}
+
+/*
+func (b *Kraken) SendSubscription(args []string) (*exchange.WebSocketHandler, error) {
+	reqID := uuid.New().String()
+	subMessage := map[string]interface{}{
+		"req_id": reqID,
+		"op":     "subscribe",
+		"args":   args,
+	}
+	fmt.Println("subscribe msg:", fmt.Sprintf("%v", subMessage["args"]))
+	if err := b.WebSocketHandler.sendAsJson(subMessage); err != nil {
+		fmt.Println("Failed to send subscription:", err)
+		return b.WebSocketHandler, err
+	}
+	fmt.Println("Subscription sent successfully.")
+	return b.WebSocketHandler, nil
+}*/

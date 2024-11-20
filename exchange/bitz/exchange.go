@@ -20,6 +20,7 @@ import (
 )
 
 type Bitz struct {
+	*exchange.WebSocketHandler
 	ID      int
 	Name    string `bson:"name"`
 	Website string `bson:"https://www.bit-z.com/"`

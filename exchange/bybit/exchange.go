@@ -20,6 +20,7 @@ import (
 )
 
 type Bybit struct {
+	*exchange.WebSocketHandler
 	ID      int
 	Name    string `bson:"name"`
 	Website string `bson:"website"`
@@ -50,6 +51,10 @@ func CreateBybit(config *exchange.Config) *Bybit {
 			API_SECRET: config.API_SECRET,
 			Source:     config.Source,
 			SourceURI:  config.SourceURI,
+			WebSocketHandler: &exchange.WebSocketHandler{
+				URL:          "wss://stream.bybit.com/v5/public/spot",
+				PingInterval: 20,
+			},
 		}
 
 		balanceMap = cmap.New()
@@ -58,14 +63,10 @@ func CreateBybit(config *exchange.Config) *Bybit {
 
 		if err := instance.InitData(); err != nil {
 			log.Printf("%v", err)
-			instance = nil
+			//instance = nil
 		}
 
-		ws := NewBybitPublicWebSocket("wss://stream.bybit.com/v5/public/spot", func(message string) error {
-			fmt.Println("Received:", message)
-			return nil
-		})
-		_, _ = ws.Connect().SendSubscription([]string{"tickers.BTCUSDT", "tickers.ETHUSDT"})
+		_ = instance.Connect()
 
 	})
 	return instance
@@ -315,4 +316,17 @@ func (e *Bybit) GetPriceFilter(pair *pair.Pair) float64 {
 		return 0.0
 	}
 	return pairConstraint.PriceFilter
+}
+
+func (b *Bybit) SubscribeAndProcessWebsocketMessage(symbols []string, messageHandler func(message string) error) {
+	b.SetMessageHandler(messageHandler)
+
+	for _, symbol := range symbols {
+		args := []string{"tickers." + symbol}
+		_, err := b.SendSubscription(args)
+		if err != nil {
+			fmt.Println("Failed to send subscription:", err)
+			return
+		}
+	}
 }

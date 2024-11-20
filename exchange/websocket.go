@@ -1,4 +1,4 @@
-package bybit
+package exchange
 
 import (
 	"context"
@@ -15,7 +15,22 @@ import (
 
 type MessageHandler func(message string) error
 
-func (b *WebSocket) handleIncomingMessages() {
+type WebSocketHandler struct {
+	conn         *websocket.Conn
+	URL          string
+	apiKey       string
+	apiSecret    string
+	maxAliveTime string
+	PingInterval int
+	OnMessage    MessageHandler
+	ctx          context.Context
+	cancel       context.CancelFunc
+	isConnected  bool
+}
+
+type WebsocketOption func(*WebSocketHandler)
+
+func (b *WebSocketHandler) handleIncomingMessages() {
 	for {
 		_, message, err := b.conn.ReadMessage()
 		if err != nil {
@@ -24,8 +39,8 @@ func (b *WebSocket) handleIncomingMessages() {
 			return
 		}
 
-		if b.onMessage != nil {
-			err := b.onMessage(string(message))
+		if b.OnMessage != nil {
+			err := b.OnMessage(string(message))
 			if err != nil {
 				fmt.Println("Error handling message:", err)
 				return
@@ -34,7 +49,7 @@ func (b *WebSocket) handleIncomingMessages() {
 	}
 }
 
-func (b *WebSocket) monitorConnection() {
+func (b *WebSocketHandler) monitorConnection() {
 	ticker := time.NewTicker(time.Second * 5) // Check every 5 seconds
 	defer ticker.Stop()
 
@@ -59,45 +74,30 @@ func (b *WebSocket) monitorConnection() {
 	}
 }
 
-func (b *WebSocket) SetMessageHandler(handler MessageHandler) {
-	b.onMessage = handler
+func (b *WebSocketHandler) SetMessageHandler(handler MessageHandler) {
+	b.OnMessage = handler
 }
-
-type WebSocket struct {
-	conn         *websocket.Conn
-	url          string
-	apiKey       string
-	apiSecret    string
-	maxAliveTime string
-	pingInterval int
-	onMessage    MessageHandler
-	ctx          context.Context
-	cancel       context.CancelFunc
-	isConnected  bool
-}
-
-type WebsocketOption func(*WebSocket)
 
 func WithPingInterval(pingInterval int) WebsocketOption {
-	return func(c *WebSocket) {
-		c.pingInterval = pingInterval
+	return func(c *WebSocketHandler) {
+		c.PingInterval = pingInterval
 	}
 }
 
 func WithMaxAliveTime(maxAliveTime string) WebsocketOption {
-	return func(c *WebSocket) {
+	return func(c *WebSocketHandler) {
 		c.maxAliveTime = maxAliveTime
 	}
 }
 
-func NewBybitPrivateWebSocket(url, apiKey, apiSecret string, handler MessageHandler, options ...WebsocketOption) *WebSocket {
-	c := &WebSocket{
-		url:          url,
+func NewBybitPrivateWebSocket(url, apiKey, apiSecret string, handler MessageHandler, options ...WebsocketOption) *WebSocketHandler {
+	c := &WebSocketHandler{
+		URL:          url,
 		apiKey:       apiKey,
 		apiSecret:    apiSecret,
 		maxAliveTime: "",
-		pingInterval: 20,
-		onMessage:    handler,
+		PingInterval: 20,
+		OnMessage:    handler,
 	}
 
 	// Apply the provided options
@@ -108,19 +108,19 @@ func NewBybitPrivateWebSocket(url, apiKey, apiSecret string, handler MessageHand
 	return c
 }
 
-func NewBybitPublicWebSocket(url string, handler MessageHandler) *WebSocket {
-	c := &WebSocket{
-		url:          url,
-		pingInterval: 20, // default is 20 seconds
-		onMessage:    handler,
+func NewPublicWebSocket(url string, handler MessageHandler) *WebSocketHandler {
+	c := &WebSocketHandler{
+		URL:          url,
+		PingInterval: 20, // default is 20 seconds
+		OnMessage:    handler,
 	}
 
 	return c
 }
 
-func (b *WebSocket) Connect() *WebSocket {
+func (b *WebSocketHandler) Connect() *WebSocketHandler {
 	var err error
-	wssUrl := b.url
+	wssUrl := b.URL
 	if b.maxAliveTime != "" {
 		wssUrl += "?max_alive_time=" + b.maxAliveTime
 	}
@@ -143,7 +143,7 @@ func (b *WebSocket) Connect() *WebSocket {
 	return b
 }
 
-func (b *WebSocket) SendSubscription(args []string) (*WebSocket, error) {
+func (b *WebSocketHandler) SendSubscription(args []string) (*WebSocketHandler, error) {
 	reqID := uuid.New().String()
 	subMessage := map[string]interface{}{
 		"req_id": reqID,
@@ -160,7 +160,7 @@ func (b *WebSocket) SendSubscription(args []string) (*WebSocket, error) {
 }
 
 // sendRequest sends a custom request over the WebSocket connection.
-func (b *WebSocket) sendRequest(op string, args map[string]interface{}, headers map[string]string) error {
+func (b *WebSocketHandler) sendRequest(op string, args map[string]interface{}, headers map[string]string) error {
 	reqID := uuid.New().String()
 	request := map[string]interface{}{
 		"reqId":  reqID,
@@ -174,13 +174,13 @@ func (b *WebSocket) sendRequest(op string, args map[string]interface{}, headers 
 	return b.sendAsJson(request)
 }
 
-func ping(b *WebSocket) {
-	if b.pingInterval <= 0 {
+func ping(b *WebSocketHandler) {
+	if b.PingInterval <= 0 {
 		fmt.Println("Ping interval is set to a non-positive value.")
 		return
 	}
 
-	ticker := time.NewTicker(time.Duration(b.pingInterval) * time.Second)
+	ticker := time.NewTicker(time.Duration(b.PingInterval) * time.Second)
 	defer ticker.Stop()
 
 	for {
@@ -209,24 +209,17 @@ func ping(b *WebSocket) {
 	}
 }
 
-func (b *WebSocket) Disconnect() error {
+func (b *WebSocketHandler) Disconnect() error {
 	b.cancel()
 	b.isConnected = false
 	return b.conn.Close()
 }
 
-func (b *WebSocket) requiresAuthentication() bool {
-	return b.url == WEBSOCKET_PRIVATE_MAINNET ||
-		b.url == WEBSOCKET_PRIVATE_TESTNET || b.url == WEBSOCKET_TRADE_MAINNET || b.url == WEBSOCKET_TRADE_TESTNET || b.url == WEBSOCKET_TRADE_DEMO || b.url == WEBSOCKET_PRIVATE_DEMO
-	// v3 offline
-	/*
-		b.url == V3_CONTRACT_PRIVATE ||
-			b.url == V3_UNIFIED_PRIVATE ||
-			b.url == V3_SPOT_PRIVATE
-	*/
+func (b *WebSocketHandler) requiresAuthentication() bool {
+	return false
 }
 
-func (b *WebSocket) sendAuth() error {
+func (b *WebSocketHandler) sendAuth() error {
 	// Get current Unix time in milliseconds
 	expires := time.Now().UnixNano()/1e6 + 10000
 	val := fmt.Sprintf("GET/realtime%d", expires)
@@ -247,7 +240,7 @@ func (b *WebSocket) sendAuth() error {
 	return b.sendAsJson(authMessage)
 }
 
-func (b *WebSocket) sendAsJson(v interface{}) error {
+func (b *WebSocketHandler) sendAsJson(v interface{}) error {
 	data, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -255,6 +248,28 @@ func (b *WebSocket) sendAsJson(v interface{}) error {
 	return b.send(string(data))
 }
 
-func (b *WebSocket) send(message string) error {
+func (b *WebSocketHandler) send(message string) error {
 	return b.conn.WriteMessage(websocket.TextMessage, []byte(message))
+}
+
+func PublicWebSocketHandlerInit(handler MessageHandler) *WebSocketHandler {
+	c := &WebSocketHandler{
+		URL:          "wss://stream.bybit.com/v5/public/spot",
+		PingInterval: 20, // default is 20 seconds
+		OnMessage:    handler,
+	}
+	return c
+}
+
+func (b *WebSocketHandler) SubscribeAndProcessWebsocketMessage(symbols []string, messageHandler func(message string) error) {
+	b.SetMessageHandler(messageHandler)
+
+	for _, symbol := range symbols {
+		args := []string{symbol}
+		_, err := b.SendSubscription(args)
+		if err != nil {
+			fmt.Println("Failed to send subscription:", err)
+			return
+		}
+	}
 }

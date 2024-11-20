@@ -20,6 +20,7 @@ import (
 )
 
 type Bcex struct {
+	*exchange.WebSocketHandler
 	ID      int
 	Name    string `bson:"name"`
 	Website string `bson:"website"`

@@ -5,6 +5,7 @@ package main
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -78,8 +79,15 @@ func Init() {
 		}
 	*/
 	for _, e := range ex {
+
 		baseCcy := "SOL"
 		quoteCcy := "USDT"
+
+		e.SubscribeAndProcessWebsocketMessage([]string{baseCcy + quoteCcy}, func(message string) error {
+			fmt.Println("Received:", message)
+			return nil
+		})
+
 		var pair1 *pair.Pair
 		if e.GetName() == "KRAKEN" {
 			quoteCcy = "USD"
