@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"net"
 	"net/http"
@@ -18,6 +17,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/avinashpandit/crypto-agg/logger"
 )
 
 type HttpPost struct {
@@ -63,10 +64,10 @@ func HttpPostRequest(httpPost *HttpPost) error {
 		if err == nil {
 			httpClient = &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyUrl)}}
 			if httpPost.DebugMode {
-				log.Printf("Apply Proxy @ %s", proxyUrl)
+				logger.Info().Msgf("Apply Proxy @ %s", proxyUrl)
 			}
 		} else {
-			// log.Printf("%+v", err)
+			// logger.Info().Msgf("%+v", err)
 			return err
 		}
 	}
@@ -122,19 +123,19 @@ func WebOutboundIP() string {
 	for i := 0; i < 10; i++ {
 		x := int(rand.Float64() * float64(num))
 		strRequestUrl := fmt.Sprintf("http://%s", uris[x])
-		log.Printf("Use %s", strRequestUrl)
+		logger.Info().Msgf("Use %s", strRequestUrl)
 
 		get := &HttpGet{
 			URI: strRequestUrl,
 			// DebugMode: true,
 		}
 		if err := HttpGetRequest(get); err != nil {
-			// log.Printf("ERROR %s", err)
+			// logger.Info().Msgf("ERROR %s", err)
 			continue
 		}
 
 		ipv4 := string(get.ResponseBody)
-		// log.Printf("ipv4 %s", ipv4)
+		// logger.Info().Msgf("ipv4 %s", ipv4)
 		if net.ParseIP(ipv4) == nil {
 			continue
 		}
@@ -204,10 +205,10 @@ func HttpGetRequest(httpGet *HttpGet) error {
 		if err == nil {
 			httpClient = &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyUrl)}}
 			if httpGet.DebugMode {
-				log.Printf("Apply Proxy @ %s", proxyUrl)
+				logger.Info().Msgf("Apply Proxy @ %s", proxyUrl)
 			}
 		} else {
-			// log.Printf("%+v", err)
+			// logger.Info().Msgf("%+v", err)
 			return err
 		}
 	}

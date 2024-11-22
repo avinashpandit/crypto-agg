@@ -3,11 +3,11 @@ package kucoin
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/utils"
 )
 
@@ -118,37 +118,37 @@ func (e *Kucoin) doSpotKline(operation *exchange.PublicOperation) error {
 	for _, k := range rawKline.Data {
 		openTime, err := strconv.ParseFloat(k[0], 64)
 		if err != nil {
-			log.Printf("%s openTime parse Err: %v %v", e.GetName(), err, k[0])
+			logger.Info().Msgf("%s openTime parse Err: %v %v", e.GetName(), err, k[0])
 			operation.Error = err
 			return err
 		}
 		open, err := strconv.ParseFloat(k[1], 64)
 		if err != nil {
-			log.Printf("%s open parse Err: %v %v", e.GetName(), err, k[1])
+			logger.Info().Msgf("%s open parse Err: %v %v", e.GetName(), err, k[1])
 			operation.Error = err
 			return err
 		}
 		close, err := strconv.ParseFloat(k[2], 64)
 		if err != nil {
-			log.Printf("%s close parse Err: %v %v", e.GetName(), err, k[2])
+			logger.Info().Msgf("%s close parse Err: %v %v", e.GetName(), err, k[2])
 			operation.Error = err
 			return err
 		}
 		high, err := strconv.ParseFloat(k[3], 64)
 		if err != nil {
-			log.Printf("%s high parse Err: %v %v", e.GetName(), err, k[3])
+			logger.Info().Msgf("%s high parse Err: %v %v", e.GetName(), err, k[3])
 			operation.Error = err
 			return err
 		}
 		low, err := strconv.ParseFloat(k[4], 64)
 		if err != nil {
-			log.Printf("%s low parse Err: %v %v", e.GetName(), err, k[4])
+			logger.Info().Msgf("%s low parse Err: %v %v", e.GetName(), err, k[4])
 			operation.Error = err
 			return err
 		}
 		volume, err := strconv.ParseFloat(k[6], 64) // k[5] Transaction amount, k[6] Transaction volume.
 		if err != nil {
-			log.Printf("%s volume parse Err: %v %v", e.GetName(), err, k[6])
+			logger.Info().Msgf("%s volume parse Err: %v %v", e.GetName(), err, k[6])
 			operation.Error = err
 			return err
 		}
@@ -207,7 +207,7 @@ func (e *Kucoin) doTickerPrice(operation *exchange.PublicOperation) error {
 		p := e.GetPairBySymbol(tp.Symbol)
 		price, err := strconv.ParseFloat(tp.AveragePrice, 64)
 		if err != nil {
-			log.Printf("%s doTickerPrice parse Err: %v, %v:%v", e.GetName(), err, tp.Symbol, tp.AveragePrice)
+			logger.Info().Msgf("%s doTickerPrice parse Err: %v, %v:%v", e.GetName(), err, tp.Symbol, tp.AveragePrice)
 			operation.Error = err
 			continue
 			// return err
@@ -215,7 +215,7 @@ func (e *Kucoin) doTickerPrice(operation *exchange.PublicOperation) error {
 
 		if p == nil {
 			if operation.DebugMode {
-				log.Printf("doTickerPrice got nil pair for symbol: %v", tp.Symbol)
+				logger.Info().Msgf("doTickerPrice got nil pair for symbol: %v", tp.Symbol)
 			}
 			continue
 		} else if p.Name == "" {

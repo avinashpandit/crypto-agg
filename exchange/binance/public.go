@@ -7,11 +7,11 @@ package binance
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
 	exchange "github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	utils "github.com/avinashpandit/crypto-agg/utils"
 )
 
@@ -76,14 +76,14 @@ func (e *Binance) doTickerPrice(operation *exchange.PublicOperation) error {
 		p := e.GetPairBySymbol(tp.Symbol)
 		price, err := strconv.ParseFloat(tp.Price, 64)
 		if err != nil {
-			log.Printf("%s doTickerPrice parse Err: %v %v", e.GetName(), err, tp.Price)
+			logger.Info().Msgf("%s doTickerPrice parse Err: %v %v", e.GetName(), err, tp.Price)
 			operation.Error = err
 			return err
 		}
 
 		if p == nil {
 			if operation.DebugMode {
-				log.Printf("doTickerPrice got nil pair for symbol: %v", tp.Symbol)
+				logger.Info().Msgf("doTickerPrice got nil pair for symbol: %v", tp.Symbol)
 			}
 			continue
 		} else if p.Name == "" {
@@ -157,7 +157,7 @@ func (e *Binance) doSpotKline(operation *exchange.PublicOperation) error {
 	err := utils.HttpGetRequest(get)
 
 	if err != nil {
-		log.Printf("%+v", err)
+		logger.Info().Msgf("%+v", err)
 		operation.Error = err
 		return err
 
@@ -178,49 +178,49 @@ func (e *Binance) doSpotKline(operation *exchange.PublicOperation) error {
 	for _, k := range rawKline {
 		open, err := strconv.ParseFloat(k[1].(string), 64)
 		if err != nil {
-			log.Printf("%s open parse Err: %v %v", e.GetName(), err, k[1])
+			logger.Info().Msgf("%s open parse Err: %v %v", e.GetName(), err, k[1])
 			operation.Error = err
 			return err
 		}
 		high, err := strconv.ParseFloat(k[2].(string), 64)
 		if err != nil {
-			log.Printf("%s high parse Err: %v %v", e.GetName(), err, k[2])
+			logger.Info().Msgf("%s high parse Err: %v %v", e.GetName(), err, k[2])
 			operation.Error = err
 			return err
 		}
 		low, err := strconv.ParseFloat(k[3].(string), 64)
 		if err != nil {
-			log.Printf("%s low parse Err: %v %v", e.GetName(), err, k[3])
+			logger.Info().Msgf("%s low parse Err: %v %v", e.GetName(), err, k[3])
 			operation.Error = err
 			return err
 		}
 		close, err := strconv.ParseFloat(k[4].(string), 64)
 		if err != nil {
-			log.Printf("%s close parse Err: %v %v", e.GetName(), err, k[4])
+			logger.Info().Msgf("%s close parse Err: %v %v", e.GetName(), err, k[4])
 			operation.Error = err
 			return err
 		}
 		volume, err := strconv.ParseFloat(k[5].(string), 64)
 		if err != nil {
-			log.Printf("%s volume parse Err: %v %v", e.GetName(), err, k[5])
+			logger.Info().Msgf("%s volume parse Err: %v %v", e.GetName(), err, k[5])
 			operation.Error = err
 			return err
 		}
 		quoteAssetVolume, err := strconv.ParseFloat(k[7].(string), 64)
 		if err != nil {
-			log.Printf("%s quoteAssetVolume parse Err: %v %v", e.GetName(), err, k[7])
+			logger.Info().Msgf("%s quoteAssetVolume parse Err: %v %v", e.GetName(), err, k[7])
 			operation.Error = err
 			return err
 		}
 		takerBuyBaseVolume, err := strconv.ParseFloat(k[9].(string), 64)
 		if err != nil {
-			log.Printf("%s takerBuyBaseVolume parse Err: %v %v", e.GetName(), err, k[9])
+			logger.Info().Msgf("%s takerBuyBaseVolume parse Err: %v %v", e.GetName(), err, k[9])
 			operation.Error = err
 			return err
 		}
 		takerBuyQuoteVolume, err := strconv.ParseFloat(k[10].(string), 64)
 		if err != nil {
-			log.Printf("%s takerBuyQuoteVolume parse Err: %v %v", e.GetName(), err, k[10])
+			logger.Info().Msgf("%s takerBuyQuoteVolume parse Err: %v %v", e.GetName(), err, k[10])
 			operation.Error = err
 			return err
 		}
@@ -277,7 +277,7 @@ func (e *Binance) doContractKline(operation *exchange.PublicOperation) error {
 
 	err := utils.HttpGetRequest(get)
 	if err != nil {
-		log.Printf("%+v", err)
+		logger.Info().Msgf("%+v", err)
 		operation.Error = err
 		return err
 
@@ -298,49 +298,49 @@ func (e *Binance) doContractKline(operation *exchange.PublicOperation) error {
 	for _, k := range rawKline {
 		open, err := strconv.ParseFloat(k[1].(string), 64)
 		if err != nil {
-			log.Printf("%s open parse Err: %v %v", e.GetName(), err, k[1])
+			logger.Info().Msgf("%s open parse Err: %v %v", e.GetName(), err, k[1])
 			operation.Error = err
 			return err
 		}
 		high, err := strconv.ParseFloat(k[2].(string), 64)
 		if err != nil {
-			log.Printf("%s high parse Err: %v %v", e.GetName(), err, k[2])
+			logger.Info().Msgf("%s high parse Err: %v %v", e.GetName(), err, k[2])
 			operation.Error = err
 			return err
 		}
 		low, err := strconv.ParseFloat(k[3].(string), 64)
 		if err != nil {
-			log.Printf("%s low parse Err: %v %v", e.GetName(), err, k[3])
+			logger.Info().Msgf("%s low parse Err: %v %v", e.GetName(), err, k[3])
 			operation.Error = err
 			return err
 		}
 		close, err := strconv.ParseFloat(k[4].(string), 64)
 		if err != nil {
-			log.Printf("%s close parse Err: %v %v", e.GetName(), err, k[4])
+			logger.Info().Msgf("%s close parse Err: %v %v", e.GetName(), err, k[4])
 			operation.Error = err
 			return err
 		}
 		volume, err := strconv.ParseFloat(k[5].(string), 64)
 		if err != nil {
-			log.Printf("%s volume parse Err: %v %v", e.GetName(), err, k[5])
+			logger.Info().Msgf("%s volume parse Err: %v %v", e.GetName(), err, k[5])
 			operation.Error = err
 			return err
 		}
 		quoteAssetVolume, err := strconv.ParseFloat(k[7].(string), 64)
 		if err != nil {
-			log.Printf("%s quoteAssetVolume parse Err: %v %v", e.GetName(), err, k[7])
+			logger.Info().Msgf("%s quoteAssetVolume parse Err: %v %v", e.GetName(), err, k[7])
 			operation.Error = err
 			return err
 		}
 		takerBuyBaseVolume, err := strconv.ParseFloat(k[9].(string), 64)
 		if err != nil {
-			log.Printf("%s takerBuyBaseVolume parse Err: %v %v", e.GetName(), err, k[9])
+			logger.Info().Msgf("%s takerBuyBaseVolume parse Err: %v %v", e.GetName(), err, k[9])
 			operation.Error = err
 			return err
 		}
 		takerBuyQuoteVolume, err := strconv.ParseFloat(k[10].(string), 64)
 		if err != nil {
-			log.Printf("%s takerBuyQuoteVolume parse Err: %v %v", e.GetName(), err, k[10])
+			logger.Info().Msgf("%s takerBuyQuoteVolume parse Err: %v %v", e.GetName(), err, k[10])
 			operation.Error = err
 			return err
 		}
@@ -380,12 +380,12 @@ func (e *Binance) doTradeHistory(operation *exchange.PublicOperation) error {
 	err := utils.HttpGetRequest(get)
 
 	if err != nil {
-		log.Printf("%+v", err)
+		logger.Info().Msgf("%+v", err)
 		operation.Error = err
 		return err
 
 	} else {
-		// log.Printf("%+v  ERR:%+v", string(get.ResponseBody), err) // ======================
+		// logger.Info().Msgf("%+v  ERR:%+v", string(get.ResponseBody), err) // ======================
 		if operation.DebugMode {
 			operation.RequestURI = get.URI
 			operation.CallResponce = string(get.ResponseBody)
@@ -396,20 +396,20 @@ func (e *Binance) doTradeHistory(operation *exchange.PublicOperation) error {
 			operation.Error = err
 			return err
 		} else {
-			// log.Printf("%+v ", tradeHistory)
+			// logger.Info().Msgf("%+v ", tradeHistory)
 		}
 
 		operation.TradeHistory = []*exchange.TradeDetail{}
 		for _, trade := range tradeHistory {
 			price, err := strconv.ParseFloat(trade.Price, 64)
 			if err != nil {
-				log.Printf("%s price parse Err: %v %v", e.GetName(), err, trade.Price)
+				logger.Info().Msgf("%s price parse Err: %v %v", e.GetName(), err, trade.Price)
 				operation.Error = err
 				return err
 			}
 			amount, err := strconv.ParseFloat(trade.Qty, 64)
 			if err != nil {
-				log.Printf("%s amount parse Err: %v %v", e.GetName(), err, trade.Qty)
+				logger.Info().Msgf("%s amount parse Err: %v %v", e.GetName(), err, trade.Qty)
 				operation.Error = err
 				return err
 			}

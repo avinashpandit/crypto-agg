@@ -7,11 +7,11 @@ package bitz
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
 	exchange "github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	utils "github.com/avinashpandit/crypto-agg/utils"
 )
 
@@ -121,12 +121,12 @@ func (e *Bitz) doTradeHistory(operation *exchange.PublicOperation) error {
 	err := utils.HttpGetRequest(get)
 
 	if err != nil {
-		log.Printf("%+v", err)
+		logger.Info().Msgf("%+v", err)
 		operation.Error = err
 		return err
 
 	} else {
-		// log.Printf("%+v  ERR:%+v", string(get.ResponseBody), err) // ======================
+		// logger.Info().Msgf("%+v  ERR:%+v", string(get.ResponseBody), err) // ======================
 		if operation.DebugMode {
 			operation.RequestURI = get.URI
 			operation.CallResponce = string(get.ResponseBody)
@@ -139,7 +139,7 @@ func (e *Bitz) doTradeHistory(operation *exchange.PublicOperation) error {
 		} else if tradeHistory.Status != 200 {
 			operation.Error = err
 			return err
-			// log.Printf("%+v ", tradeHistory)
+			// logger.Info().Msgf("%+v ", tradeHistory)
 		}
 
 		operation.TradeHistory = []*exchange.TradeDetail{}
@@ -148,13 +148,13 @@ func (e *Bitz) doTradeHistory(operation *exchange.PublicOperation) error {
 			trade := tradeHistory.Data[i]
 			price, err := strconv.ParseFloat(trade.P, 64)
 			if err != nil {
-				log.Printf("%s price parse Err: %v %v", e.GetName(), err, trade.P)
+				logger.Info().Msgf("%s price parse Err: %v %v", e.GetName(), err, trade.P)
 				operation.Error = err
 				return err
 			}
 			amount, err := strconv.ParseFloat(trade.N, 64)
 			if err != nil {
-				log.Printf("%s amount parse Err: %v %v", e.GetName(), err, trade.N)
+				logger.Info().Msgf("%s amount parse Err: %v %v", e.GetName(), err, trade.N)
 				operation.Error = err
 				return err
 			}

@@ -5,8 +5,8 @@ package kraken
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 import (
+	"encoding/json"
 	"fmt"
-	"log"
 	"sort"
 	"strconv"
 	"sync"
@@ -15,6 +15,7 @@ import (
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 	"github.com/avinashpandit/crypto-agg/utils"
 )
@@ -41,6 +42,14 @@ var instance *Kraken
 var once sync.Once
 var reqID = 1
 
+type KrakenTicker struct {
+	Symbol string  `json:"symbol"`
+	Bid    float64 `json:"bid"`
+	Ask    float64 `json:"ask"`
+	BidQty float64 `json:"bid_qty"`
+	AskQty float64 `json:"ask_qty"`
+}
+
 /***************************************************/
 func CreateKraken(config *exchange.Config) *Kraken {
 	once.Do(func() {
@@ -57,6 +66,42 @@ func CreateKraken(config *exchange.Config) *Kraken {
 			WebSocketHandler: &exchange.WebSocketHandler{
 				URL:          "wss://ws.kraken.com/v2",
 				PingInterval: 20,
+				Exchange:     instance,
+				OnMessage: func(message string, exchange1 exchange.Exchange) error {
+					var response exchange.WebSocketResponse
+					error := json.Unmarshal([]byte(message), &response)
+					if error != nil {
+						logger.Error().Msgf("Error unmarshalling message: %v", error)
+						return error
+					}
+
+					switch response.Channel {
+					case "ticker":
+						switch response.Type {
+						case "snapshot":
+							var tickers []KrakenTicker
+							json.Unmarshal([]byte(response.Data), &tickers)
+
+							for _, ticker := range tickers {
+								bidQuote := exchange.Quote{Rate: ticker.Bid, Quantity: ticker.BidQty}
+								askQuote := exchange.Quote{Rate: ticker.Ask, Quantity: ticker.AskQty}
+								instance.OnTickerMessage(bidQuote, askQuote,
+									ticker.Symbol, instance)
+							}
+						case "update":
+							var tickers []KrakenTicker
+							json.Unmarshal([]byte(response.Data), &tickers)
+							for _, ticker := range tickers {
+								bidQuote := exchange.Quote{Rate: ticker.Bid, Quantity: ticker.BidQty}
+								askQuote := exchange.Quote{Rate: ticker.Ask, Quantity: ticker.AskQty}
+								instance.OnTickerMessage(bidQuote, askQuote,
+									ticker.Symbol, instance)
+							}
+						}
+
+					}
+					return nil
+				},
 			},
 		}
 
@@ -65,7 +110,7 @@ func CreateKraken(config *exchange.Config) *Kraken {
 		pairConstraintMap = cmap.New()
 
 		if err := instance.InitData(); err != nil {
-			log.Printf("%v", err)
+			logger.Info().Msgf("%v", err)
 			instance = nil
 		}
 
@@ -320,16 +365,16 @@ func (e *Kraken) GetPriceFilter(pair *pair.Pair) float64 {
 	return pairConstraint.PriceFilter
 }
 
-func (b *Kraken) SubscribeAndProcessWebsocketMessage(pairs []pair.Pair, messageHandler func(message string) error) {
-	b.SetMessageHandler(messageHandler)
+func (b *Kraken) SubscribeAndProcessQuoteMessage(pairs []pair.Pair, messageHandler exchange.QuoteHandler) {
+	b.SetQuoteHandler(messageHandler, b.Exchange)
 
 	for _, pair := range pairs {
-		fmt.Println("symbol:", pair.Name)
+		logger.Info().Msgf("symbol:", pair.Name)
 
 		args := []string{pair.Target.Code + "/" + pair.Base.Code}
 		_, err := b.SendSubscription(args)
 		if err != nil {
-			fmt.Println("Failed to send subscription:", err)
+			logger.Info().Msgf("Failed to send subscription:", err)
 			return
 		}
 	}
@@ -346,11 +391,11 @@ func (b *Kraken) SendSubscription(args []string) (*exchange.WebSocketHandler, er
 		},
 		"req_id": reqID,
 	}
-	fmt.Println("subscribe msg:", fmt.Sprintf("%v", subMessage))
+	logger.Info().Msgf("subscribe msg:", fmt.Sprintf("%v", subMessage))
 	if err := b.WebSocketHandler.SendAsJson(subMessage); err != nil {
-		fmt.Println("Failed to send subscription:", err)
+		logger.Info().Msgf("Failed to send subscription:", err)
 		return b.WebSocketHandler, err
 	}
-	fmt.Println("Subscription sent successfully.")
+	logger.Info().Msgf("Subscription sent successfully.")
 	return b.WebSocketHandler, nil
 }

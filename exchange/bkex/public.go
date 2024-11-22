@@ -101,25 +101,25 @@ func (e *Bkex) doTradeHistory(operation *exchange.PublicOperation) error {
 	err := utils.HttpGetRequest(get)
 
 	if err != nil {
-		// log.Printf("%+v", err)
+		// logger.Info().Msgf("%+v", err)
 		return err
 
 	} else {
-		// log.Printf("%+v  ERR:%+v", string(get.ResponseBody), err)
+		// logger.Info().Msgf("%+v  ERR:%+v", string(get.ResponseBody), err)
 		tradeHistory := &TradeHistory{}
 		if err := json.Unmarshal(get.ResponseBody, &tradeHistory); err != nil {
 			return err
 		} else {
-			// log.Printf("%+v ", tradeHistory)
+			// logger.Info().Msgf("%+v ", tradeHistory)
 		}
 
-		// log.Printf("%s", get.ResponseBody)
+		// logger.Info().Msgf("%s", get.ResponseBody)
 
 		operation.TradeHistory = []*exchange.TradeDetail{}
 		for i := len(tradeHistory.Data) - 1; i > 0; i-- {
 			d2 := tradeHistory.Data[i]
 			// d2 := d1.Data[i]
-			// log.Printf("d2:%+v", d2)
+			// logger.Info().Msgf("d2:%+v", d2)
 			td := &exchange.TradeDetail{
 				ID:       fmt.Sprintf("%d", d2.CreatedTime),
 				Quantity: d2.DealAmount,
@@ -133,8 +133,8 @@ func (e *Bkex) doTradeHistory(operation *exchange.PublicOperation) error {
 			} else if d2.TradeDealDirection == "S" {
 				td.Direction = exchange.Sell
 			}
-			// log.Printf("d2: %+v ", d2)
-			// log.Printf("TD: %+v ", td)
+			// logger.Info().Msgf("d2: %+v ", d2)
+			// logger.Info().Msgf("TD: %+v ", td)
 
 			operation.TradeHistory = append(operation.TradeHistory, td)
 

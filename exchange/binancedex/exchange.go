@@ -7,7 +7,6 @@ package binancedex
 import (
 	"encoding/hex"
 	"fmt"
-	"log"
 	"sort"
 	"strconv"
 	"sync"
@@ -16,6 +15,7 @@ import (
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 	"github.com/avinashpandit/crypto-agg/utils"
 	// "github.com/tendermint/tendermint/crypto/secp256k1"
@@ -59,7 +59,7 @@ func CreateBinanceDex(config *exchange.Config) *BinanceDex {
 
 		instance.recoveryFromPrivateKey(config.API_SECRET)
 		if err := instance.InitData(); err != nil {
-			log.Printf("%v", err)
+			logger.Info().Msgf("%v", err)
 			instance = nil
 		}
 	})
@@ -169,7 +169,7 @@ func (e *BinanceDex) GetCoinBySymbol(symbol string) *coin.Coin {
 				return cc.Coin
 			}
 		} else {
-			log.Printf("Get ID %s CoinConstraint Err", id)
+			logger.Info().Msgf("Get ID %s CoinConstraint Err", id)
 		}
 	}
 	return nil

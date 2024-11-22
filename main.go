@@ -5,8 +5,6 @@ package main
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 import (
-	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"runtime"
@@ -21,7 +19,7 @@ import (
 )
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Llongfile)
+	logger.InitLog()
 	// create wait group
 	wg := sync.WaitGroup{}
 	wg.Add(1)
@@ -43,25 +41,25 @@ func main() {
 }
 
 func Init() {
-	var ex []exchange.Exchange = make([]exchange.Exchange, 2)
-	ex[0] = InitExchange(exchange.BYBIT)
-	ex[1] = InitExchange(exchange.KRAKEN)
+	var ex []exchange.Exchange = make([]exchange.Exchange, 1)
+	//ex[0] = InitExchange(exchange.BYBIT)
+	ex[0] = InitExchange(exchange.KRAKEN)
 	//ex[2] = InitExchange(exchange.KUCOIN)
 	/*ex[2] = InitExchange(exchange.COINBASE)
 	 */
 	/*
 		coins := e.GetCoins()
 		pairs := e.GetPairs()
-		log.Printf("%+v", pairs)
+		logger.Info().Msgf("%+v", pairs)
 		for _, coin := range coins {
 			pair := e.GetPairBySymbol("s" + coin.Code + "USDT")
 			maker, err := e.OrderBook(pair)
 			if err != nil {
-				log.Printf("OrderBook err: %v", err)
+				logger.Info().Msgf("OrderBook err: %v", err)
 			}
 
 			if len(maker.Bids) > 0 && len(maker.Asks) > 0 {
-				log.Printf("%+v %+v %+v", pair, maker.Bids[0], maker.Asks[0])
+				logger.Info().Msgf("%+v %+v %+v", pair, maker.Bids[0], maker.Asks[0])
 			}
 
 		}
@@ -73,7 +71,7 @@ func Init() {
 		for _, coin := range coins {
 			balances := e.GetBalance(coin)
 			if balances > 0 {
-				log.Printf("Coin Balance %s: %f ", coin.Code, balances)
+				logger.Info().Msgf("Coin Balance %s: %f ", coin.Code, balances)
 				Test_AODepositAddress(e, coin)
 			}
 		}
@@ -93,18 +91,20 @@ func Init() {
 			}
 		}
 
-		e.SubscribeAndProcessWebsocketMessage([]pair.Pair{*pair1}, func(message string) error {
-			fmt.Println("Received:", message)
+		var quoteHandler exchange.QuoteHandler = func(bid exchange.Quote, ask exchange.Quote, p string, e exchange.Exchange) error {
+			logger.Info().Msgf("Received: %v  %+v from exchange %s", bid, ask, e.GetName())
 			return nil
-		})
+		}
+
+		e.SubscribeAndProcessQuoteMessage([]pair.Pair{*pair1}, quoteHandler)
 
 		maker, err := e.OrderBook(pair1)
 		if err != nil {
-			log.Printf("OrderBook err: %v", err)
+			logger.Info().Msgf("OrderBook err: %v", err)
 		}
 
 		if maker != nil && len(maker.Bids) > 0 && len(maker.Asks) > 0 {
-			log.Printf("%+v %+v %+v", pair1, maker.Bids[0], maker.Asks[0])
+			logger.Info().Msgf("%+v %+v %+v", pair1, maker.Bids[0], maker.Asks[0])
 		}
 	}
 
@@ -113,15 +113,15 @@ func Init() {
 	for _, coin := range coins {
 		balances := e.GetBalance(coin)
 		if balances > 0 {
-			log.Printf("Coin Balance %s: %f ", coin.Code, balances)
+			logger.Info().Msgf("Coin Balance %s: %f ", coin.Code, balances)
 			pair := e.GetPairBySymbol(coin.Code + "USD")
-			log.Printf("%+v", pair)
+			logger.Info().Msgf("%+v", pair)
 			maker, err := e.OrderBook(pair)
 			if err != nil {
-				log.Printf("OrderBook err: %v", err)
+				logger.Info().Msgf("OrderBook err: %v", err)
 			}
 
-			log.Printf("%+v", maker)
+			logger.Info().Msgf("%+v", maker)
 
 			//Test_AODepositAddress(e, coin)
 		}
@@ -139,7 +139,7 @@ func InitExchange(exName exchange.ExchangeName) exchange.Exchange {
 
 	inMan := initial.CreateInitManager()
 	e := inMan.Init(config)
-	log.Printf("Initial [ %v ] ", e.GetName())
+	logger.Info().Msgf("Initial [ %v ] ", e.GetName())
 
 	config = nil
 

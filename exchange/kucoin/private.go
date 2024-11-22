@@ -3,10 +3,10 @@ package kucoin
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/avinashpandit/crypto-agg/coin"
+	"github.com/avinashpandit/crypto-agg/logger"
 
 	"github.com/avinashpandit/crypto-agg/exchange"
 )
@@ -87,7 +87,7 @@ func (e *Kucoin) doGetOrderHistory(operation *exchange.AccountOperation) error {
 		}
 
 		jsonGetOpenOrder := e.ApiKeyRequest("GET", strRequest, mapParams, operation.Sandbox)
-		// log.Printf("-=--=-===-==--========================================json: %v", jsonGetOpenOrder) //TODO
+		// logger.Info().Msgf("-=--=-===-==--========================================json: %v", jsonGetOpenOrder) //TODO
 		if operation.DebugMode {
 			operation.RequestURI = strRequest
 			// operation.MapParams = fmt.Sprintf("%+v", mapParams)
@@ -152,7 +152,7 @@ func (e *Kucoin) doGetOrderHistory(operation *exchange.AccountOperation) error {
 				// } else if dealQuantity == 0 {
 				// 	order.Status = exchange.New
 			} else {
-				// log.Printf("%v doneOrder get unknown status: %+v", e.GetName(), o)
+				// logger.Info().Msgf("%v doneOrder get unknown status: %+v", e.GetName(), o)
 				order.Status = exchange.Cancelled
 			}
 
@@ -209,7 +209,7 @@ func (e *Kucoin) doGetOpenOrder(operation *exchange.AccountOperation) error {
 		}
 
 		jsonGetOpenOrder := e.ApiKeyRequest("GET", strRequest, mapParams, operation.Sandbox)
-		// log.Printf("-=--=-===-==--========================================json: %v", jsonGetOpenOrder) //TODO
+		// logger.Info().Msgf("-=--=-===-==--========================================json: %v", jsonGetOpenOrder) //TODO
 		if operation.DebugMode {
 			operation.RequestURI = strRequest
 			// operation.MapParams = fmt.Sprintf("%+v", mapParams)
@@ -274,7 +274,7 @@ func (e *Kucoin) doGetOpenOrder(operation *exchange.AccountOperation) error {
 			} else if dealQuantity == 0 {
 				order.Status = exchange.New
 			} else {
-				log.Printf("%v openOrder get unknown status: %+v", e.GetName(), o)
+				logger.Info().Msgf("%v openOrder get unknown status: %+v", e.GetName(), o)
 				order.Status = exchange.Other
 			}
 
@@ -583,7 +583,7 @@ func (e *Kucoin) transfer(operation *exchange.AccountOperation) error {
 		operation.CallResponce = jsonTransferReturn
 	}
 
-	// log.Printf("return: %v", jsonTransferReturn)
+	// logger.Info().Msgf("return: %v", jsonTransferReturn)
 	if err := json.Unmarshal([]byte(jsonTransferReturn), &innerTrans); err != nil {
 		operation.Error = fmt.Errorf("%s InnerTrans Json Unmarshal Err: %v, %s", e.GetName(), err, jsonTransferReturn)
 		return operation.Error
@@ -595,7 +595,7 @@ func (e *Kucoin) transfer(operation *exchange.AccountOperation) error {
 		return operation.Error
 	}
 
-	log.Printf("InnerTrans response %v", jsonTransferReturn)
+	logger.Info().Msgf("InnerTrans response %v", jsonTransferReturn)
 
 	return nil
 }
@@ -630,7 +630,7 @@ func (e *Kucoin) getAllBalance(operation *exchange.AccountOperation) error {
 		operation.CallResponce = jsonAllBalanceReturn
 	}
 
-	// log.Printf("jsonAllBalanceReturn: %v", jsonAllBalanceReturn)
+	// logger.Info().Msgf("jsonAllBalanceReturn: %v", jsonAllBalanceReturn)
 	if err := json.Unmarshal([]byte(jsonAllBalanceReturn), &jsonResponse); err != nil {
 		operation.Error = fmt.Errorf("%s getAllBalance Json Unmarshal Err: %v, %s", e.GetName(), err, jsonAllBalanceReturn)
 		return operation.Error
@@ -710,7 +710,7 @@ func (e *Kucoin) getBalance(operation *exchange.AccountOperation) error {
 		operation.CallResponce = jsonBalanceReturn
 	}
 
-	// log.Printf("jsonBalanceReturn: %v", jsonBalanceReturn)
+	// logger.Info().Msgf("jsonBalanceReturn: %v", jsonBalanceReturn)
 	if err := json.Unmarshal([]byte(jsonBalanceReturn), &jsonResponse); err != nil {
 		operation.Error = fmt.Errorf("%s getBalance Json Unmarshal Err: %v, %s", e.GetName(), err, jsonBalanceReturn)
 		return operation.Error

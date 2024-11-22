@@ -9,13 +9,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 )
 
@@ -245,7 +245,7 @@ func (e *Blank) DoAccountOperation(operation *exchange.AccountOperation) error {
 
 func (e *Blank) UpdateAllBalances() {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return
 	}
 
@@ -256,14 +256,14 @@ func (e *Blank) UpdateAllBalances() {
 
 	jsonBalanceReturn := e.ApiKeyGet(strRequestPath, make(map[string]string))
 	if err := json.Unmarshal([]byte(jsonBalanceReturn), &jsonResponse); err != nil {
-		log.Printf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
+		logger.Info().Msgf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
 		return
 	} else if !jsonResponse.Success {
-		log.Printf("%s UpdateAllBalances Failed: %v", e.GetName(), jsonResponse.Message)
+		logger.Info().Msgf("%s UpdateAllBalances Failed: %v", e.GetName(), jsonResponse.Message)
 		return
 	}
 	if err := json.Unmarshal(jsonResponse.Data, &accountBalance); err != nil {
-		log.Printf("%s UpdateAllBalances Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
+		logger.Info().Msgf("%s UpdateAllBalances Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
 		return
 	}
 
@@ -278,7 +278,7 @@ func (e *Blank) UpdateAllBalances() {
 /* Withdraw(coin *coin.Coin, quantity float64, addr, tag string) */
 func (e *Blank) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) bool {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return false
 	}
 
@@ -294,14 +294,14 @@ func (e *Blank) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) bo
 
 	jsonSubmitWithdraw := e.ApiKeyRequest("POST", strRequestPath, mapParams)
 	if err := json.Unmarshal([]byte(jsonSubmitWithdraw), &jsonResponse); err != nil {
-		log.Printf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonSubmitWithdraw)
+		logger.Info().Msgf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonSubmitWithdraw)
 		return false
 	} else if !jsonResponse.Success {
-		log.Printf("%s Withdraw Failed: %v", e.GetName(), jsonResponse.Message)
+		logger.Info().Msgf("%s Withdraw Failed: %v", e.GetName(), jsonResponse.Message)
 		return false
 	}
 	if err := json.Unmarshal(jsonResponse.Data, &withdraw); err != nil {
-		log.Printf("%s Withdraw Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
+		logger.Info().Msgf("%s Withdraw Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
 		return false
 	}
 

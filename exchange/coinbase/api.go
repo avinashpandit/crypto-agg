@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math"
 	"net/http"
 	"strconv"
@@ -17,6 +16,7 @@ import (
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 )
 
@@ -184,7 +184,7 @@ func (e *Coinbase) doWithdraw(operation *exchange.AccountOperation) error {
 
 func (e *Coinbase) UpdateAllBalances() {
 	if e.API_KEY == "" || e.API_SECRET == "" || e.Passphrase == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return
 	}
 
@@ -192,15 +192,15 @@ func (e *Coinbase) UpdateAllBalances() {
 	strRequest := "/accounts"
 
 	jsonBalanceReturn := e.ApiKeyRequest("GET", nil, strRequest)
-	// log.Printf("%s", jsonBalanceReturn)
+	// logger.Info().Msgf("%s", jsonBalanceReturn)
 	if err := json.Unmarshal([]byte(jsonBalanceReturn), &accountBalance); err != nil {
-		log.Printf("%s UpdateAllBalances json Unmarshal error: %v %s", e.GetName(), err, jsonBalanceReturn)
+		logger.Info().Msgf("%s UpdateAllBalances json Unmarshal error: %v %s", e.GetName(), err, jsonBalanceReturn)
 		return
 	} else {
 		for _, balance := range accountBalance {
 			freeamount, err := strconv.ParseFloat(balance.Available, 64)
 			if err != nil {
-				log.Printf("%s UpdateAllBalances err: %+v %v", e.GetName(), balance, err)
+				logger.Info().Msgf("%s UpdateAllBalances err: %+v %v", e.GetName(), balance, err)
 				return
 			} else {
 				c := e.GetCoinBySymbol(balance.Currency)
@@ -215,7 +215,7 @@ func (e *Coinbase) UpdateAllBalances() {
 /* Withdraw(coin *coin.Coin, quantity float64, addr, tag string) */
 func (e *Coinbase) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) bool {
 	if e.API_KEY == "" || e.API_SECRET == "" || e.Passphrase == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return false
 	}
 

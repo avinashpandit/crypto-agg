@@ -13,13 +13,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 
 	"strconv"
@@ -57,12 +57,12 @@ Step 3: Modify API Path(strRequestUrl)*/
 func (e *Gemini) GetCoinsData() error {
 	file, err := ioutil.ReadFile("../exchange/gemini/constraint.json")
 	if err != nil {
-		log.Printf("%s getCoin read file err: %v", e.GetName, err)
+		logger.Info().Msgf("%s getCoin read file err: %v", e.GetName, err)
 	}
 
 	pairsFile := PairsFile{}
 	if err := json.Unmarshal(file, &pairsFile); err != nil {
-		log.Printf("%s Get Coins Json Unmarshal Err: %v %v", e.GetName(), err, file)
+		logger.Info().Msgf("%s Get Coins Json Unmarshal Err: %v %v", e.GetName(), err, file)
 	}
 
 	for _, data := range pairsFile {
@@ -141,12 +141,12 @@ Step 3: Modify API Path(strRequestUrl)
 func (e *Gemini) GetPairsData() error {
 	file, err := ioutil.ReadFile("../exchange/gemini/constraint.json")
 	if err != nil {
-		log.Printf("%s getPair read file err: %v", e.GetName, err)
+		logger.Info().Msgf("%s getPair read file err: %v", e.GetName, err)
 	}
 
 	pairsFile := PairsFile{}
 	if err := json.Unmarshal(file, &pairsFile); err != nil {
-		log.Printf("%s Get Coins Json Unmarshal Err: %v %v", e.GetName(), err, file)
+		logger.Info().Msgf("%s Get Coins Json Unmarshal Err: %v %v", e.GetName(), err, file)
 	}
 
 	for _, data := range pairsFile {
@@ -263,7 +263,7 @@ func (e *Gemini) DoAccountOperation(operation *exchange.AccountOperation) error 
 
 func (e *Gemini) UpdateAllBalances() {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return
 	}
 	accountBalance := AccountBalances{}
@@ -274,7 +274,7 @@ func (e *Gemini) UpdateAllBalances() {
 
 	jsonBalanceReturn := e.ApiKeyRequest("POST", strRequest, mapParams)
 	if err := json.Unmarshal([]byte(jsonBalanceReturn), &accountBalance); err != nil {
-		log.Printf("%s UpdateAllBalances Result Unmarshal Err: %v %s", e.GetName(), err, jsonBalanceReturn)
+		logger.Info().Msgf("%s UpdateAllBalances Result Unmarshal Err: %v %s", e.GetName(), err, jsonBalanceReturn)
 		return
 	}
 
@@ -283,7 +283,7 @@ func (e *Gemini) UpdateAllBalances() {
 		if c != nil {
 			freeAmount, err := strconv.ParseFloat(v.Amount, 64)
 			if err != nil {
-				log.Printf("%s balance parse Err: %v %v", e.GetName(), err, v.Amount)
+				logger.Info().Msgf("%s balance parse Err: %v %v", e.GetName(), err, v.Amount)
 				return
 			}
 			balanceMap.Set(c.Code, freeAmount)
@@ -297,7 +297,7 @@ withdrawalID and message are Only shown for BTC, ZEC, LTC and BCH withdrawals.
 */
 func (e *Gemini) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) bool {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil", e.GetName())
 		return false
 	}
 	withdrawal := Withdrawal{}
@@ -310,7 +310,7 @@ func (e *Gemini) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) b
 
 	jsonSubmitWithdraw := e.ApiKeyRequest("POST", strRequest, mapParams)
 	if err := json.Unmarshal([]byte(jsonSubmitWithdraw), &withdrawal); err != nil {
-		log.Printf("%s Withdraw Result Unmarshal Err: %v %s", e.GetName(), err, jsonSubmitWithdraw)
+		logger.Info().Msgf("%s Withdraw Result Unmarshal Err: %v %s", e.GetName(), err, jsonSubmitWithdraw)
 		return false
 	}
 	return true

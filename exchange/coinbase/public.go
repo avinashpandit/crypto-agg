@@ -7,12 +7,12 @@ package coinbase
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	exchange "github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 	utils "github.com/avinashpandit/crypto-agg/utils"
 )
@@ -48,7 +48,7 @@ func (e *Coinbase) doGetCoin(operation *exchange.PublicOperation) error {
 	strUrl := API_URL + strRequestUrl
 
 	jsonCurrencyReturn := exchange.HttpGetRequest(strUrl, nil)
-	// log.Printf("jsonCurrencyReturn: %v", jsonCurrencyReturn) // ==========
+	// logger.Info().Msgf("jsonCurrencyReturn: %v", jsonCurrencyReturn) // ==========
 	if err := json.Unmarshal([]byte(jsonCurrencyReturn), &coinsData); err != nil {
 		return fmt.Errorf("%s Get Coins Json Unmarshal Err: %v %v", e.GetName(), err, jsonCurrencyReturn)
 	}
@@ -106,7 +106,7 @@ func (e *Coinbase) doGetPair(operation *exchange.PublicOperation) error {
 	strUrl := API_URL + strRequestUrl
 
 	jsonSymbolsReturn := exchange.HttpGetRequest(strUrl, nil)
-	// log.Printf("jsonSymbolsReturn: %v", jsonSymbolsReturn) // ==========
+	// logger.Info().Msgf("jsonSymbolsReturn: %v", jsonSymbolsReturn) // ==========
 	if err := json.Unmarshal([]byte(jsonSymbolsReturn), &pairsData); err != nil {
 		return fmt.Errorf("%s Get Pairs Json Unmarshal Err: %v %v", e.GetName(), err, jsonSymbolsReturn)
 	}
@@ -131,12 +131,12 @@ func (e *Coinbase) doGetPair(operation *exchange.PublicOperation) error {
 
 				lotsize, err = strconv.ParseFloat(data.BaseIncrement, 64)
 				if err != nil {
-					log.Printf("%s Lot Size Err: %v", e.GetName(), err)
+					logger.Info().Msgf("%s Lot Size Err: %v", e.GetName(), err)
 					lotsize = DEFAULT_LOT_SIZE
 				}
 				priceFilter, err = strconv.ParseFloat(data.QuoteIncrement, 64)
 				if err != nil {
-					log.Printf("%s Price Filter Err: %v", e.GetName(), err)
+					logger.Info().Msgf("%s Price Filter Err: %v", e.GetName(), err)
 					priceFilter = DEFAULT_PRICE_FILTER
 				}
 
@@ -234,12 +234,12 @@ func (e *Coinbase) doTradeHistory(operation *exchange.PublicOperation) error {
 	err := utils.HttpGetRequest(get)
 
 	if err != nil {
-		log.Printf("%+v", err)
+		logger.Info().Msgf("%+v", err)
 		operation.Error = err
 		return err
 
 	} else {
-		// log.Printf("%+v  ERR:%+v", string(get.ResponseBody), err) // ======================
+		// logger.Info().Msgf("%+v  ERR:%+v", string(get.ResponseBody), err) // ======================
 		if operation.DebugMode {
 			operation.RequestURI = get.URI
 			operation.CallResponce = string(get.ResponseBody)
@@ -250,20 +250,20 @@ func (e *Coinbase) doTradeHistory(operation *exchange.PublicOperation) error {
 			operation.Error = err
 			return err
 		} else {
-			// log.Printf("%+v ", tradeHistory)
+			// logger.Info().Msgf("%+v ", tradeHistory)
 		}
 
 		operation.TradeHistory = []*exchange.TradeDetail{}
 		for _, trade := range tradeHistory {
 			price, err := strconv.ParseFloat(trade.Price, 64)
 			if err != nil {
-				log.Printf("%s price parse Err: %v %v", e.GetName(), err, trade.Price)
+				logger.Info().Msgf("%s price parse Err: %v %v", e.GetName(), err, trade.Price)
 				operation.Error = err
 				return err
 			}
 			amount, err := strconv.ParseFloat(trade.Size, 64)
 			if err != nil {
-				log.Printf("%s amount parse Err: %v %v", e.GetName(), err, trade.Size)
+				logger.Info().Msgf("%s amount parse Err: %v %v", e.GetName(), err, trade.Size)
 				operation.Error = err
 				return err
 			}

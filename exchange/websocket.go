@@ -9,41 +9,51 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
-type MessageHandler func(message string) error
+type QuoteHandler func(bid Quote, ask Quote, pair string, exchange Exchange) error
+type MessageHandler func(message string, exchange Exchange) error
 
 type WebSocketHandler struct {
-	conn         *websocket.Conn
-	URL          string
-	apiKey       string
-	apiSecret    string
-	maxAliveTime string
-	PingInterval int
-	OnMessage    MessageHandler
-	ctx          context.Context
-	cancel       context.CancelFunc
-	isConnected  bool
+	conn            *websocket.Conn
+	URL             string
+	apiKey          string
+	apiSecret       string
+	maxAliveTime    string
+	PingInterval    int
+	OnMessage       MessageHandler
+	OnTickerMessage QuoteHandler
+	ctx             context.Context
+	cancel          context.CancelFunc
+	isConnected     bool
+	Exchange        Exchange
 }
 
 type WebsocketOption func(*WebSocketHandler)
+
+type WebSocketResponse struct {
+	Type    string          `json:"type"`
+	Data    json.RawMessage `json:"data"`
+	Channel string          `json:"channel"`
+}
 
 func (b *WebSocketHandler) handleIncomingMessages() {
 	for {
 		_, message, err := b.conn.ReadMessage()
 		if err != nil {
-			fmt.Println("Error reading:", err)
+			logger.Info().Msgf("Error reading:", err)
 			b.isConnected = false
 			return
 		}
 
-		if b.OnMessage != nil {
-			err := b.OnMessage(string(message))
+		if b.OnTickerMessage != nil {
+			err = b.OnMessage(string(message), b.Exchange)
 			if err != nil {
-				fmt.Println("Error handling message:", err)
+				logger.Info().Msgf("Error handling message:", err)
 				return
 			}
 		}
@@ -57,10 +67,10 @@ func (b *WebSocketHandler) monitorConnection() {
 	for {
 		<-ticker.C
 		if !b.isConnected && b.ctx.Err() == nil { // Check if disconnected and context not done
-			fmt.Println("Attempting to reconnect...")
+			logger.Info().Msgf("Attempting to reconnect...")
 			con := b.Connect() // Example, adjust parameters as needed
 			if con == nil {
-				fmt.Println("Reconnection failed:")
+				logger.Info().Msgf("Reconnection failed:")
 			} else {
 				b.isConnected = true
 				go b.handleIncomingMessages() // Restart message handling
@@ -75,8 +85,9 @@ func (b *WebSocketHandler) monitorConnection() {
 	}
 }
 
-func (b *WebSocketHandler) SetMessageHandler(handler MessageHandler) {
-	b.OnMessage = handler
+func (b *WebSocketHandler) SetQuoteHandler(handler QuoteHandler, exchange Exchange) {
+	b.OnTickerMessage = handler
+	b.Exchange = exchange
 }
 
 func WithPingInterval(pingInterval int) WebsocketOption {
@@ -91,14 +102,14 @@ func WithMaxAliveTime(maxAliveTime string) WebsocketOption {
 	}
 }
 
-func NewBybitPrivateWebSocket(url, apiKey, apiSecret string, handler MessageHandler, options ...WebsocketOption) *WebSocketHandler {
+func NewBybitPrivateWebSocket(url, apiKey, apiSecret string, handler QuoteHandler, options ...WebsocketOption) *WebSocketHandler {
 	c := &WebSocketHandler{
-		URL:          url,
-		apiKey:       apiKey,
-		apiSecret:    apiSecret,
-		maxAliveTime: "",
-		PingInterval: 20,
-		OnMessage:    handler,
+		URL:             url,
+		apiKey:          apiKey,
+		apiSecret:       apiSecret,
+		maxAliveTime:    "",
+		PingInterval:    20,
+		OnTickerMessage: handler,
 	}
 
 	// Apply the provided options
@@ -109,11 +120,11 @@ func NewBybitPrivateWebSocket(url, apiKey, apiSecret string, handler MessageHand
 	return c
 }
 
-func NewPublicWebSocket(url string, handler MessageHandler) *WebSocketHandler {
+func NewPublicWebSocket(url string, handler QuoteHandler) *WebSocketHandler {
 	c := &WebSocketHandler{
-		URL:          url,
-		PingInterval: 20, // default is 20 seconds
-		OnMessage:    handler,
+		URL:             url,
+		PingInterval:    20, // default is 20 seconds
+		OnTickerMessage: handler,
 	}
 
 	return c
@@ -129,7 +140,7 @@ func (b *WebSocketHandler) Connect() *WebSocketHandler {
 
 	if b.requiresAuthentication() {
 		if err = b.sendAuth(); err != nil {
-			fmt.Println("Failed Connection:", fmt.Sprintf("%v", err))
+			logger.Info().Msgf("Failed Connection:", fmt.Sprintf("%v", err))
 			return nil
 		}
 	}
@@ -151,12 +162,12 @@ func (b *WebSocketHandler) SendSubscription(args []string) (*WebSocketHandler, e
 		"op":     "subscribe",
 		"args":   args,
 	}
-	fmt.Println("subscribe msg:", fmt.Sprintf("%v", subMessage["args"]))
+	logger.Info().Msgf("subscribe msg:", fmt.Sprintf("%v", subMessage["args"]))
 	if err := b.SendAsJson(subMessage); err != nil {
-		fmt.Println("Failed to send subscription:", err)
+		logger.Info().Msgf("Failed to send subscription:", err)
 		return b, err
 	}
-	fmt.Println("Subscription sent successfully.")
+	logger.Info().Msgf("Subscription sent successfully.")
 	return b, nil
 }
 
@@ -169,15 +180,15 @@ func (b *WebSocketHandler) sendRequest(op string, args map[string]interface{}, h
 		"op":     op,
 		"args":   []interface{}{args},
 	}
-	fmt.Println("request headers:", fmt.Sprintf("%v", request["header"]))
-	fmt.Println("request op channel:", fmt.Sprintf("%v", request["op"]))
-	fmt.Println("request msg:", fmt.Sprintf("%v", request["args"]))
+	logger.Info().Msgf("request headers:", fmt.Sprintf("%v", request["header"]))
+	logger.Info().Msgf("request op channel:", fmt.Sprintf("%v", request["op"]))
+	logger.Info().Msgf("request msg:", fmt.Sprintf("%v", request["args"]))
 	return b.SendAsJson(request)
 }
 
 func ping(b *WebSocketHandler) {
 	if b.PingInterval <= 0 {
-		fmt.Println("Ping interval is set to a non-positive value.")
+		logger.Info().Msgf("Ping interval is set to a non-positive value.")
 		return
 	}
 
@@ -194,17 +205,17 @@ func ping(b *WebSocketHandler) {
 			}
 			jsonPingMessage, err := json.Marshal(pingMessage)
 			if err != nil {
-				fmt.Println("Failed to marshal ping message:", err)
+				logger.Info().Msgf("Failed to marshal ping message:", err)
 				continue
 			}
 			if err := b.conn.WriteMessage(websocket.TextMessage, jsonPingMessage); err != nil {
-				fmt.Println("Failed to send ping:", err)
+				logger.Info().Msgf("Failed to send ping:", err)
 				return
 			}
-			fmt.Println("Ping sent with UTC time:", currentTime)
+			logger.Info().Msgf("Ping sent with UTC time:", currentTime)
 
 		case <-b.ctx.Done():
-			fmt.Println("Ping context closed, stopping ping.")
+			logger.Info().Msgf("Ping context closed, stopping ping.")
 			return
 		}
 	}
@@ -230,14 +241,14 @@ func (b *WebSocketHandler) sendAuth() error {
 
 	// Convert to hexadecimal instead of base64
 	signature := hex.EncodeToString(h.Sum(nil))
-	fmt.Println("signature generated : " + signature)
+	logger.Info().Msgf("signature generated : " + signature)
 
 	authMessage := map[string]interface{}{
 		"req_id": uuid.New(),
 		"op":     "auth",
 		"args":   []interface{}{b.apiKey, expires, signature},
 	}
-	fmt.Println("auth args:", fmt.Sprintf("%v", authMessage["args"]))
+	logger.Info().Msgf("auth args:", fmt.Sprintf("%v", authMessage["args"]))
 	return b.SendAsJson(authMessage)
 }
 
@@ -253,23 +264,23 @@ func (b *WebSocketHandler) send(message string) error {
 	return b.conn.WriteMessage(websocket.TextMessage, []byte(message))
 }
 
-func PublicWebSocketHandlerInit(handler MessageHandler) *WebSocketHandler {
+func PublicWebSocketHandlerInit(handler QuoteHandler) *WebSocketHandler {
 	c := &WebSocketHandler{
-		URL:          "wss://stream.bybit.com/v5/public/spot",
-		PingInterval: 20, // default is 20 seconds
-		OnMessage:    handler,
+		URL:             "wss://stream.bybit.com/v5/public/spot",
+		PingInterval:    20, // default is 20 seconds
+		OnTickerMessage: handler,
 	}
 	return c
 }
 
-func (b *WebSocketHandler) SubscribeAndProcessWebsocketMessage(pairs []pair.Pair, messageHandler func(message string) error) {
-	b.SetMessageHandler(messageHandler)
+func (b *WebSocketHandler) SubscribeAndProcessQuoteMessage(pairs []pair.Pair, quoteHandler QuoteHandler) {
+	b.SetQuoteHandler(quoteHandler, b.Exchange)
 
 	for _, pair := range pairs {
 		args := []string{pair.Name}
 		_, err := b.SendSubscription(args)
 		if err != nil {
-			fmt.Println("Failed to send subscription:", err)
+			logger.Info().Msgf("Failed to send subscription:", err)
 			return
 		}
 	}

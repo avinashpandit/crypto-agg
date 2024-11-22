@@ -6,7 +6,6 @@ package exchange
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strconv"
 	"strings"
@@ -14,6 +13,7 @@ import (
 	"time"
 
 	"github.com/avinashpandit/crypto-agg/coin"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 
 	cmap "github.com/orcaman/concurrent-map"
@@ -36,7 +36,7 @@ type Exchange interface {
 	GetSymbolByCoin(coin *coin.Coin) string
 	DeleteCoin(coin *coin.Coin)
 
-	SubscribeAndProcessWebsocketMessage(pairs []pair.Pair, messageHandler func(message string) error)
+	SubscribeAndProcessQuoteMessage(pairs []pair.Pair, messageHandler QuoteHandler)
 
 	/***** Pair Information *****/
 	GetPairConstraint(pair *pair.Pair) *PairConstraint
@@ -124,7 +124,7 @@ func (e *ExchangeManager) Add(exchange Exchange) {
 	id := fmt.Sprintf("%d", exchange.GetID())
 	if exIDMap.Has(id) {
 		// log.Fatal("%s ID: %d is exist. Please check.", exchange.GetName(), exchange.GetID())
-		log.Printf("%s ID: %d is exist. Please check.", exchange.GetName(), exchange.GetID())
+		logger.Info().Msgf("%s ID: %d is exist. Please check.", exchange.GetName(), exchange.GetID())
 	} else {
 		exIDMap.Set(id, exchange)
 	}
@@ -207,9 +207,9 @@ func (e *ExchangeManager) UpdateExData(conf *Update) {
 				eInstance := e.Get(exName)
 				if eInstance != nil {
 					if err := eInstance.InitData(); err != nil {
-						log.Printf("Updating %s Data is failed.", exName)
+						logger.Info().Msgf("Updating %s Data is failed.", exName)
 					} else {
-						log.Printf("%s Data Updated. Coin: %d   Pair: %d", exName, len(eInstance.GetCoins()), len(eInstance.GetPairs()))
+						logger.Info().Msgf("%s Data Updated. Coin: %d   Pair: %d", exName, len(eInstance.GetCoins()), len(eInstance.GetPairs()))
 					}
 				}
 			}

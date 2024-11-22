@@ -75,7 +75,7 @@ func ExistID(id int) bool {
 	if tmp, ok := coinMap.Get(fmt.Sprintf("%d", id)); ok {
 		c := tmp.(*Coin)
 		if c.Code != "" {
-			// log.Printf("Exist id, coin: %+v", c)
+			// logger.Info().Msgf("Exist id, coin: %+v", c)
 			return true
 		}
 	}

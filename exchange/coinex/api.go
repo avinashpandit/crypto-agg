@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math"
 	"net/http"
 	"strconv"
@@ -17,6 +16,7 @@ import (
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 )
 
@@ -278,7 +278,7 @@ func (e *Coinex) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 
 func (e *Coinex) UpdateAllBalances() {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return
 	}
 
@@ -291,14 +291,14 @@ func (e *Coinex) UpdateAllBalances() {
 
 	jsonBalanceReturn := e.ApiKeyRequest("GET", strRequest, mapParams)
 	if err := json.Unmarshal([]byte(jsonBalanceReturn), &jsonResponse); err != nil {
-		log.Printf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
+		logger.Info().Msgf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
 		return
 	} else if jsonResponse.Code != 0 {
-		log.Printf("%s UpdateAllBalances Failed: %d %v", e.GetName(), jsonResponse.Code, jsonResponse.Message)
+		logger.Info().Msgf("%s UpdateAllBalances Failed: %d %v", e.GetName(), jsonResponse.Code, jsonResponse.Message)
 		return
 	}
 	if err := json.Unmarshal(jsonResponse.Data, &accountBalance); err != nil {
-		log.Printf("%s UpdateAllBalances Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
+		logger.Info().Msgf("%s UpdateAllBalances Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
 		return
 	}
 
@@ -316,7 +316,7 @@ func (e *Coinex) UpdateAllBalances() {
 /* Withdraw(coin *coin.Coin, quantity float64, addr, tag string) */
 func (e *Coinex) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) bool {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("coinex API Key or Secret Key are nil.")
+		logger.Info().Msgf("coinex API Key or Secret Key are nil.")
 		return false
 	}
 
@@ -339,14 +339,14 @@ func (e *Coinex) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) b
 
 	jsonWithdraw := e.ApiKeyPost(strRequestUrl, mapParams)
 	if err := json.Unmarshal([]byte(jsonWithdraw), &jsonResponse); err != nil {
-		log.Printf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonWithdraw)
+		logger.Info().Msgf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonWithdraw)
 		return false
 	} else if jsonResponse.Code != 0 {
-		log.Printf("%s Withdraw Failed: %v", e.GetName(), jsonWithdraw)
+		logger.Info().Msgf("%s Withdraw Failed: %v", e.GetName(), jsonWithdraw)
 		return false
 	}
 	if err := json.Unmarshal(jsonResponse.Data, &withdraw); err != nil {
-		log.Printf("%s Withdraw Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
+		logger.Info().Msgf("%s Withdraw Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
 		return false
 	}
 
@@ -424,7 +424,7 @@ func (e *Coinex) LimitBuy(pair *pair.Pair, quantity, rate float64) (*exchange.Or
 	if err := json.Unmarshal(jsonResponse.Data, &placeOrder); err != nil {
 		return nil, fmt.Errorf("%s LimitSell Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
 	} else if placeOrder.Status != "done" {
-		log.Printf("%s LimitBuy not complete, status: %v", e.GetName(), placeOrder.Status)
+		logger.Info().Msgf("%s LimitBuy not complete, status: %v", e.GetName(), placeOrder.Status)
 	}
 
 	order := &exchange.Order{

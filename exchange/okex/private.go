@@ -3,10 +3,10 @@ package okex
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 )
 
 func (e *Okex) DoAccountOperation(operation *exchange.AccountOperation) error {
@@ -90,7 +90,7 @@ func (e *Okex) subTransfer(operation *exchange.AccountOperation) error {
 		return operation.Error
 	}
 
-	// log.Printf("SubTransfer response %v", jsonTransferReturn)
+	// logger.Info().Msgf("SubTransfer response %v", jsonTransferReturn)
 
 	return nil
 }
@@ -316,7 +316,7 @@ func (e *Okex) transfer(operation *exchange.AccountOperation) error {
 		operation.Error = fmt.Errorf("%s Transfer failed: %v", e.GetName(), jsonTransferReturn)
 		return operation.Error
 	}
-	log.Printf("%s Transfer return: %+v", e.GetName(), jsonTransferReturn)
+	logger.Info().Msgf("%s Transfer return: %+v", e.GetName(), jsonTransferReturn)
 
 	return nil
 }
@@ -343,9 +343,9 @@ func (e *Okex) getAllBalance(operation *exchange.AccountOperation) error {
 		operation.CallResponce = jsonAllBalanceReturn
 	}
 
-	// log.Printf("jsonAllBalanceReturn: %v", jsonAllBalanceReturn) //====================
+	// logger.Info().Msgf("jsonAllBalanceReturn: %v", jsonAllBalanceReturn) //====================
 	if jsonAllBalanceReturn == "[]" {
-		// log.Printf("getAllBalance empty return: %v", jsonAllBalanceReturn)
+		// logger.Info().Msgf("getAllBalance empty return: %v", jsonAllBalanceReturn)
 		for _, c := range e.GetCoins() { // set all coin balance to 0
 			b := exchange.AssetBalance{
 				Coin: c,
@@ -402,7 +402,7 @@ func (e *Okex) getBalance(operation *exchange.AccountOperation) error {
 	}
 
 	if jsonBalanceReturn == "[]" {
-		log.Printf("getBalance empty return: %v", jsonBalanceReturn)
+		logger.Info().Msgf("getBalance empty return: %v", jsonBalanceReturn)
 		operation.BalanceFrozen = 0
 		operation.BalanceAvailable = 0
 		return nil

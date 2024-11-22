@@ -6,7 +6,6 @@ package kucoin
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strconv"
 	"sync"
@@ -15,6 +14,7 @@ import (
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 	"github.com/avinashpandit/crypto-agg/utils"
 )
@@ -61,7 +61,7 @@ func CreateKucoin(config *exchange.Config) *Kucoin {
 		pairConstraintMap = cmap.New()
 
 		if err := instance.InitData(); err != nil {
-			log.Printf("%v", err)
+			logger.Info().Msgf("%v", err)
 			instance = nil
 		}
 	})
@@ -163,7 +163,7 @@ func (e *Kucoin) GetCoinBySymbol(symbol string) *coin.Coin {
 				return cc.Coin
 			}
 		} else {
-			log.Printf("Get ID %s CoinConstraint Err", id)
+			logger.Info().Msgf("Get ID %s CoinConstraint Err", id)
 		}
 	}
 	return nil

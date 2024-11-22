@@ -6,7 +6,6 @@ package bybit
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strconv"
 	"sync"
@@ -15,6 +14,7 @@ import (
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 	"github.com/avinashpandit/crypto-agg/utils"
 )
@@ -54,6 +54,7 @@ func CreateBybit(config *exchange.Config) *Bybit {
 			WebSocketHandler: &exchange.WebSocketHandler{
 				URL:          "wss://stream.bybit.com/v5/public/spot",
 				PingInterval: 20,
+				Exchange:     instance,
 			},
 		}
 
@@ -62,7 +63,7 @@ func CreateBybit(config *exchange.Config) *Bybit {
 		pairConstraintMap = cmap.New()
 
 		if err := instance.InitData(); err != nil {
-			log.Printf("%v", err)
+			logger.Info().Msgf("%v", err)
 			//instance = nil
 		}
 
@@ -318,8 +319,9 @@ func (e *Bybit) GetPriceFilter(pair *pair.Pair) float64 {
 	return pairConstraint.PriceFilter
 }
 
-func (b *Bybit) SubscribeAndProcessWebsocketMessage(pairs []pair.Pair, messageHandler func(message string) error) {
-	b.SetMessageHandler(messageHandler)
+func (b *Bybit) SubscribeAndProcessQuoteMessage(pairs []pair.Pair, messageHandler exchange.QuoteHandler) {
+	logger.Info().Msgf("SubscribeAndProcessQuoteMessage")
+	/*b.SetQuoteHandler(messageHandler, b.Exchange)
 
 	for _, pair := range pairs {
 		symbol := b.GetSymbolByPair(&pair)
@@ -332,8 +334,8 @@ func (b *Bybit) SubscribeAndProcessWebsocketMessage(pairs []pair.Pair, messageHa
 
 		_, err := b.SendSubscription(args)
 		if err != nil {
-			fmt.Println("Failed to send subscription:", err)
+			logger.Info().Msgf("Failed to send subscription:", err)
 			return
 		}
-	}
+	}*/
 }

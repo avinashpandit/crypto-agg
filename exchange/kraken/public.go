@@ -41,12 +41,12 @@ func (e *Kraken) doTradeHistory(operation *exchange.PublicOperation) error {
 	// err := utils.HttpGetRequest(get)
 
 	// if err != nil {
-	// 	log.Printf("%+v", err)
+	// 	logger.Info().Msgf("%+v", err)
 	// 	operation.Error = err
 	// 	return err
 
 	// } else {
-	// 	// log.Printf("%+v  ERR:%+v", string(get.ResponseBody), err) // ======================
+	// 	// logger.Info().Msgf("%+v  ERR:%+v", string(get.ResponseBody), err) // ======================
 	// 	if operation.DebugMode {
 	// 		operation.RequestURI = get.URI
 	// 		operation.CallResponce = string(get.ResponseBody)
@@ -59,20 +59,20 @@ func (e *Kraken) doTradeHistory(operation *exchange.PublicOperation) error {
 	// 	} else if len(tradeHistory) == 0 {
 	// 		operation.Error = fmt.Errorf("Got Empty Trade History")
 	// 		return fmt.Errorf("Got Empty Trade History")
-	// 		// log.Printf("%+v ", tradeHistory)
+	// 		// logger.Info().Msgf("%+v ", tradeHistory)
 	// 	}
 
 	// 	operation.TradeHistory = []*exchange.TradeDetail{}
 	// 	for _, trade := range tradeHistory {
 	// 		price, err := strconv.ParseFloat(trade[0].Price, 64)
 	// 		if err != nil {
-	// 			log.Printf("%s price parse Err: %v %v", e.GetName(), err, trade[0].Price)
+	// 			logger.Info().Msgf("%s price parse Err: %v %v", e.GetName(), err, trade[0].Price)
 	// 			operation.Error = err
 	// 			return err
 	// 		}
 	// 		amount, err := strconv.ParseFloat(trade[0].Volume, 64)
 	// 		if err != nil {
-	// 			log.Printf("%s amount parse Err: %v %v", e.GetName(), err, trade[0].Volume)
+	// 			logger.Info().Msgf("%s amount parse Err: %v %v", e.GetName(), err, trade[0].Volume)
 	// 			operation.Error = err
 	// 			return err
 	// 		}

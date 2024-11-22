@@ -95,7 +95,7 @@ func (e *Coinex) subTransfer(operation *exchange.AccountOperation) error {
 		return operation.Error
 	}
 
-	// log.Printf("SubTransfer response %v", jsonTransferReturn)
+	// logger.Info().Msgf("SubTransfer response %v", jsonTransferReturn)
 
 	return nil
 }

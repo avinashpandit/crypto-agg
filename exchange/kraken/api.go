@@ -12,7 +12,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math"
 	"mime"
 	"net/http"
@@ -23,6 +22,7 @@ import (
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 )
 
@@ -313,7 +313,7 @@ func (e *Kraken) doWithdraw(operation *exchange.AccountOperation) error {
 
 func (e *Kraken) UpdateAllBalances() {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return
 	}
 
@@ -323,14 +323,14 @@ func (e *Kraken) UpdateAllBalances() {
 
 	jsonBalanceReturn := e.ApiKeyPost(strRequest, url.Values{}, make(map[string]string))
 	if err := json.Unmarshal([]byte(jsonBalanceReturn), &jsonResponse); err != nil {
-		log.Printf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
+		logger.Info().Msgf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
 		return
 	} else if len(jsonResponse.Error) != 0 {
-		log.Printf("%s UpdateAllBalances Failed: %v", e.GetName(), jsonResponse.Error)
+		logger.Info().Msgf("%s UpdateAllBalances Failed: %v", e.GetName(), jsonResponse.Error)
 		return
 	}
 	if err := json.Unmarshal(jsonResponse.Result, &accountBalance); err != nil && jsonResponse.Result != nil {
-		log.Printf("%s UpdateAllBalances Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse)
+		logger.Info().Msgf("%s UpdateAllBalances Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse)
 		return
 	}
 
@@ -345,7 +345,7 @@ func (e *Kraken) UpdateAllBalances() {
 
 func (e *Kraken) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) bool {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return false
 	}
 
@@ -361,14 +361,14 @@ func (e *Kraken) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) b
 
 	jsonSubmitWithdraw := e.ApiKeyPost(strRequestPath, values, &WithdrawResponse{})
 	if err := json.Unmarshal([]byte(jsonSubmitWithdraw), &jsonResponse); err != nil {
-		log.Printf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonSubmitWithdraw)
+		logger.Info().Msgf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonSubmitWithdraw)
 		return false
 	} else if len(jsonResponse.Error) != 0 {
-		log.Printf("%s Withdraw Failed: %v", e.GetName(), jsonResponse.Error)
+		logger.Info().Msgf("%s Withdraw Failed: %v", e.GetName(), jsonResponse.Error)
 		return false
 	}
 	if err := json.Unmarshal(jsonResponse.Result, &withdraw); err != nil {
-		log.Printf("%s Withdraw Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Result)
+		logger.Info().Msgf("%s Withdraw Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Result)
 		return false
 	}
 

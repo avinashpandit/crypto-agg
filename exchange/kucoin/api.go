@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math"
 	"net/http"
 	"strconv"
@@ -17,6 +16,7 @@ import (
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 )
 
@@ -237,12 +237,12 @@ func (e *Kucoin) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 
 		buydata.Rate, err = strconv.ParseFloat(bid[0], 64)
 		if err != nil {
-			log.Printf("%s OrderBook strconv.ParseFloat Rate error:%v", e.GetName(), err)
+			logger.Info().Msgf("%s OrderBook strconv.ParseFloat Rate error:%v", e.GetName(), err)
 			return nil, err
 		}
 		buydata.Quantity, err = strconv.ParseFloat(bid[1], 64)
 		if err != nil {
-			log.Printf("%s OrderBook strconv.ParseFloat Quantity error:%v", e.GetName(), err)
+			logger.Info().Msgf("%s OrderBook strconv.ParseFloat Quantity error:%v", e.GetName(), err)
 			return nil, err
 		}
 		maker.Bids = append(maker.Bids, buydata)
@@ -252,11 +252,11 @@ func (e *Kucoin) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 		selldata := exchange.Quote{}
 		selldata.Rate, err = strconv.ParseFloat(orderBook.Asks[i][0], 64)
 		if err != nil {
-			log.Printf("%s OrderBook strconv.ParseFloat  Rate error:%v", e.GetName(), err)
+			logger.Info().Msgf("%s OrderBook strconv.ParseFloat  Rate error:%v", e.GetName(), err)
 		}
 		selldata.Quantity, err = strconv.ParseFloat(orderBook.Asks[i][1], 64)
 		if err != nil {
-			log.Printf("%s OrderBook strconv.ParseFloat  Quantity error:%v", e.GetName(), err)
+			logger.Info().Msgf("%s OrderBook strconv.ParseFloat  Quantity error:%v", e.GetName(), err)
 		}
 		maker.Asks = append(maker.Asks, selldata)
 	}
@@ -268,7 +268,7 @@ func (e *Kucoin) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 
 func (e *Kucoin) UpdateAllBalances() {
 	if e.API_KEY == "" || e.API_SECRET == "" || e.Passphrase == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return
 	}
 
@@ -281,14 +281,14 @@ func (e *Kucoin) UpdateAllBalances() {
 
 	jsonBalanceReturn := e.ApiKeyRequest("GET", strRequest, mapParams, false)
 	if err := json.Unmarshal([]byte(jsonBalanceReturn), &jsonResponse); err != nil {
-		log.Printf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
+		logger.Info().Msgf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
 		return
 	} else if jsonResponse.Code != "200000" {
-		log.Printf("%s UpdateAllBalances Failed: %s %v", e.GetName(), jsonResponse.Code, jsonResponse.Msg)
+		logger.Info().Msgf("%s UpdateAllBalances Failed: %s %v", e.GetName(), jsonResponse.Code, jsonResponse.Msg)
 		return
 	}
 	if err := json.Unmarshal(jsonResponse.Data, &accountBalance); err != nil {
-		log.Printf("%s UpdateAllBalances Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
+		logger.Info().Msgf("%s UpdateAllBalances Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
 		return
 	}
 
@@ -306,7 +306,7 @@ func (e *Kucoin) UpdateAllBalances() {
 /* Withdraw(coin *coin.Coin, quantity float64, addr, tag string) */
 func (e *Kucoin) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) bool {
 	if e.API_KEY == "" || e.API_SECRET == "" || e.Passphrase == "" {
-		log.Printf("Kucoin API Key or Secret Key or passphrase are nil.")
+		logger.Info().Msgf("Kucoin API Key or Secret Key or passphrase are nil.")
 		return false
 	}
 
@@ -324,19 +324,19 @@ func (e *Kucoin) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) b
 
 	jsonCreateWithdraw := e.ApiKeyRequest("POST", strRequestUrl, mapParams, false)
 	if err := json.Unmarshal([]byte(jsonCreateWithdraw), &jsonResponse); err != nil {
-		log.Printf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonCreateWithdraw)
+		logger.Info().Msgf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonCreateWithdraw)
 		return false
 	} else if jsonResponse.Code != "200000" {
-		log.Printf("%s Withdraw Failed: %s %v", e.GetName(), jsonResponse.Code, jsonResponse.Msg)
+		logger.Info().Msgf("%s Withdraw Failed: %s %v", e.GetName(), jsonResponse.Code, jsonResponse.Msg)
 		return false
 	}
 
 	if err := json.Unmarshal(jsonResponse.Data, &withdraw); err != nil {
-		log.Printf("%s Withdraw Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
+		logger.Info().Msgf("%s Withdraw Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
 		return false
 	}
 
-	log.Printf("the withdraw state response %v and the withdraw id: %v", jsonCreateWithdraw, withdraw.WithdrawalID)
+	logger.Info().Msgf("the withdraw state response %v and the withdraw id: %v", jsonCreateWithdraw, withdraw.WithdrawalID)
 	return true
 }
 
@@ -436,7 +436,7 @@ func (e *Kucoin) OrderStatus(order *exchange.Order) error {
 	strRequest := fmt.Sprintf("/api/v1/orders/%s", order.OrderID)
 
 	jsonOrderStatus := e.ApiKeyRequest("GET", strRequest, nil, false)
-	// log.Printf("--------------------------------------%v", jsonOrderStatus)
+	// logger.Info().Msgf("--------------------------------------%v", jsonOrderStatus)
 	if err := json.Unmarshal([]byte(jsonOrderStatus), &jsonResponse); err != nil {
 		return fmt.Errorf("%s OrderStatus Json Unmarshal Err: %v %v", e.GetName(), err, jsonOrderStatus)
 	} else if jsonResponse.Code != "200000" {

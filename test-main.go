@@ -1,9 +1,8 @@
 package main
 
 import (
-	"log"
-
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 	// "../../exchange/kraken"
 	// "../../utils"
@@ -27,7 +26,7 @@ func test() {
 	for _, coin := range coins {
 		balances := e.GetBalance(coin)
 		if balances > 0 {
-			log.Printf("Coin Balance %s: %f ", coin.Code, balances)
+			logger.Info().Msgf("Coin Balance %s: %f ", coin.Code, balances)
 			Test_AODepositAddress(e, coin)
 		}
 	}

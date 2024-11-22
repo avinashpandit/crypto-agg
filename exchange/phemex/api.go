@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math"
 	"net/http"
 	"strconv"
@@ -17,6 +16,7 @@ import (
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 )
 
@@ -281,7 +281,7 @@ func (e *Phemex) getAllBalance(operation *exchange.AccountOperation) error {
 
 func (e *Phemex) UpdateAllBalances() {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return
 	}
 
@@ -291,14 +291,14 @@ func (e *Phemex) UpdateAllBalances() {
 
 	jsonBalanceReturn := e.ApiKeyRequest("GET", strRequest, make(map[string]string))
 	if err := json.Unmarshal([]byte(jsonBalanceReturn), &jsonResponse); err != nil {
-		log.Printf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
+		logger.Info().Msgf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
 		return
 	} /* else if jsonResponse.Code != 200 {
-		log.Printf("%s UpdateAllBalances Failed: %v", e.GetName(), jsonResponse)
+		logger.Info().Msgf("%s UpdateAllBalances Failed: %v", e.GetName(), jsonResponse)
 		return
 	} */
 	if err := json.Unmarshal([]byte(jsonBalanceReturn), &accountBalance); err != nil {
-		log.Printf("%s UpdateAllBalances Data Unmarshal Err: %v %s", e.GetName(), err, jsonBalanceReturn)
+		logger.Info().Msgf("%s UpdateAllBalances Data Unmarshal Err: %v %s", e.GetName(), err, jsonBalanceReturn)
 		return
 	}
 
@@ -307,7 +307,7 @@ func (e *Phemex) UpdateAllBalances() {
 		if c != nil {
 			freeAmount, err := strconv.ParseFloat(v.Available, 64)
 			if err != nil {
-				log.Printf("%s balance parse Err: %v %v", e.GetName(), err, v.Available)
+				logger.Info().Msgf("%s balance parse Err: %v %v", e.GetName(), err, v.Available)
 				return
 			}
 			balanceMap.Set(c.Code, freeAmount)
@@ -338,7 +338,7 @@ func (e *Phemex) LimitSell(pair *pair.Pair, quantity, rate float64) (*exchange.O
 	mapParams["price"] = strconv.FormatFloat(rate, 'f', priceFilter, 64)
 	mapParams["quantity"] = strconv.FormatFloat(quantity, 'f', lotSize, 64)
 
-	// log.Printf("mapParams: %+v", mapParams)
+	// logger.Info().Msgf("mapParams: %+v", mapParams)
 
 	jsonPlaceReturn := e.ApiKeyRequest("POST", strRequest, mapParams)
 	if err := json.Unmarshal([]byte(jsonPlaceReturn), &jsonResponse); err != nil {
@@ -376,7 +376,7 @@ func (e *Phemex) LimitBuy(pair *pair.Pair, quantity, rate float64) (*exchange.Or
 	mapParams["price"] = strconv.FormatFloat(rate, 'f', priceFilter, 64)
 	mapParams["quantity"] = strconv.FormatFloat(quantity, 'f', lotSize, 64)
 
-	// log.Printf("mapParams: %+v", mapParams)
+	// logger.Info().Msgf("mapParams: %+v", mapParams)
 
 	jsonPlaceReturn := e.ApiKeyRequest("POST", strRequest, mapParams)
 	if err := json.Unmarshal([]byte(jsonPlaceReturn), &jsonResponse); err != nil {

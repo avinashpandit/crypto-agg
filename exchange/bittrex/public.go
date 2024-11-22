@@ -123,11 +123,11 @@ func (e *Bittrex) doTradeHistory(operation *exchange.PublicOperation) error {
 			layout := "2006-01-02T15:04:05.00"
 			t, err := time.Parse(layout, d.TimeStamp)
 			if err != nil {
-				// log.Printf("%+v", err)
+				// logger.Info().Msgf("%+v", err)
 				layout = "2006-01-02T15:04:05.0"
 				t, err = time.Parse(layout, d.TimeStamp)
 				if err != nil {
-					// log.Printf("%+v", err)
+					// logger.Info().Msgf("%+v", err)
 					layout = "2006-01-02T15:04:05"
 					t, err = time.Parse(layout, d.TimeStamp)
 				}

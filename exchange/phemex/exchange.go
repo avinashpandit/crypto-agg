@@ -6,7 +6,6 @@ package phemex
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strconv"
 	"sync"
@@ -15,6 +14,7 @@ import (
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 	"github.com/avinashpandit/crypto-agg/utils"
 )
@@ -58,7 +58,7 @@ func CreatePhemex(config *exchange.Config) *Phemex {
 		pairConstraintMap = cmap.New()
 
 		if err := instance.InitData(); err != nil {
-			log.Printf("%v", err)
+			logger.Info().Msgf("%v", err)
 			instance = nil
 		}
 	})

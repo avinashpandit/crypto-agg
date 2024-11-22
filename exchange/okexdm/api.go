@@ -9,13 +9,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 )
 
@@ -212,7 +212,7 @@ func (e *Okexdm) DoAccountOperation(operation *exchange.AccountOperation) error 
 
 func (e *Okexdm) UpdateAllBalances() {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return
 	}
 
@@ -223,14 +223,14 @@ func (e *Okexdm) UpdateAllBalances() {
 
 	jsonBalanceReturn := e.ApiKeyGet(strRequestPath, make(map[string]string))
 	if err := json.Unmarshal([]byte(jsonBalanceReturn), &jsonResponse); err != nil {
-		log.Printf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
+		logger.Info().Msgf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
 		return
 	} else if !jsonResponse.Success {
-		log.Printf("%s UpdateAllBalances Failed: %v", e.GetName(), jsonResponse.Message)
+		logger.Info().Msgf("%s UpdateAllBalances Failed: %v", e.GetName(), jsonResponse.Message)
 		return
 	}
 	if err := json.Unmarshal(jsonResponse.Data, &accountBalance); err != nil {
-		log.Printf("%s UpdateAllBalances Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
+		logger.Info().Msgf("%s UpdateAllBalances Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
 		return
 	}
 
@@ -245,7 +245,7 @@ func (e *Okexdm) UpdateAllBalances() {
 /* Withdraw(coin *coin.Coin, quantity float64, addr, tag string) */
 func (e *Okexdm) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) bool {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return false
 	}
 
@@ -261,14 +261,14 @@ func (e *Okexdm) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) b
 
 	jsonSubmitWithdraw := e.ApiKeyRequest("POST", strRequestPath, mapParams)
 	if err := json.Unmarshal([]byte(jsonSubmitWithdraw), &jsonResponse); err != nil {
-		log.Printf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonSubmitWithdraw)
+		logger.Info().Msgf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonSubmitWithdraw)
 		return false
 	} else if !jsonResponse.Success {
-		log.Printf("%s Withdraw Failed: %v", e.GetName(), jsonResponse.Message)
+		logger.Info().Msgf("%s Withdraw Failed: %v", e.GetName(), jsonResponse.Message)
 		return false
 	}
 	if err := json.Unmarshal(jsonResponse.Data, &withdraw); err != nil {
-		log.Printf("%s Withdraw Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
+		logger.Info().Msgf("%s Withdraw Result Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
 		return false
 	}
 
@@ -567,35 +567,35 @@ for i := 0; i < 7; i++ {
 	if thisweek.Add(time.Duration(24*i)*time.Hour).Weekday() != time.Friday {
 		continue
 	}
-	fmt.Println("looped for " + strconv.Itoa(i) + " days")
+	logger.Info().Msgf("looped for " + strconv.Itoa(i) + " days")
 	thisweek = thisweek.Add(time.Duration(24*i) * time.Hour)
 }
-fmt.Println("CW IS " + thisweek.Format("060102")) */
+logger.Info().Msgf("CW IS " + thisweek.Format("060102")) */
 
 /* nextweek := time.Now().UTC().Add(time.Duration(16) * time.Hour)
 for i := 7; i < 14; i++ {
 	if nextweek.Add(time.Duration(24*i)*time.Hour).Weekday() != time.Friday {
 		continue
 	}
-	fmt.Println("looped for " + strconv.Itoa(i) + " days")
+	logger.Info().Msgf("looped for " + strconv.Itoa(i) + " days")
 	nextweek = nextweek.Add(time.Duration(24*i) * time.Hour)
 }
-fmt.Println("NW IS " + nextweek.Format("060102")) */
+logger.Info().Msgf("NW IS " + nextweek.Format("060102")) */
 
 /* monthcount := time.Now().UTC().Add(time.Duration(16) * time.Hour)
-fmt.Println("initial day is " + monthcount.Format("060102"))
+logger.Info().Msgf("initial day is " + monthcount.Format("060102"))
 for i := 1; i < 15; i++ {
 	mm := monthcount.Add(time.Duration(168) * time.Hour).Month()
 	if mm == time.April || mm == time.July || mm == time.October || mm == time.January {
-		fmt.Println("looped for " + strconv.Itoa(i) + " weeks")
-		fmt.Println("exit day is " + monthcount.Format("060102"))
-		fmt.Println("exit is the " + strconv.Itoa(int(mm)) + "th month")
+		logger.Info().Msgf("looped for " + strconv.Itoa(i) + " weeks")
+		logger.Info().Msgf("exit day is " + monthcount.Format("060102"))
+		logger.Info().Msgf("exit is the " + strconv.Itoa(int(mm)) + "th month")
 		break
 	}
 	monthcount = monthcount.Add(time.Duration(168) * time.Hour)
-	fmt.Println(monthcount.Format("060102"))
+	logger.Info().Msgf(monthcount.Format("060102"))
 }
-fmt.Println("==" + monthcount.Format("060102"))
+logger.Info().Msgf("==" + monthcount.Format("060102"))
 
 quarterday := monthcount.Add(time.Duration(168) * time.Hour)
 for i := -7; i < 0; i++ {
@@ -604,4 +604,4 @@ for i := -7; i < 0; i++ {
 	}
 	quarterday = quarterday.Add(time.Duration(24*i) * time.Hour)
 }
-fmt.Println("CQ IS " + quarterday.Format("060102")) */
+logger.Info().Msgf("CQ IS " + quarterday.Format("060102")) */

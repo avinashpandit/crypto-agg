@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math"
 	"net/http"
 	"strconv"
@@ -17,6 +16,7 @@ import (
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 )
 
@@ -54,7 +54,7 @@ Step 2: Add Model of API Response
 Step 3: Modify API Path(strRequestUrl)*/
 func (e *Binance) GetCoinsData() error {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s Get Coins API Key or Secret Key are nil. Using backupGetCoin", e.GetName())
+		logger.Info().Msgf("%s Get Coins API Key or Secret Key are nil. Using backupGetCoin", e.GetName())
 		return e.backupGetCoinsData()
 	}
 
@@ -245,24 +245,24 @@ func (e *Binance) GetPairsData() error {
 					case "LOT_SIZE":
 						lotsize, err = strconv.ParseFloat(filter.StepSize, 64)
 						if err != nil {
-							log.Printf("%s Lot Size Err: %v", e.GetName(), err)
+							logger.Info().Msgf("%s Lot Size Err: %v", e.GetName(), err)
 							lotsize = DEFAULT_LOT_SIZE
 						}
 						minTrade, err = strconv.ParseFloat(filter.MinQty, 64)
 						if err != nil {
-							log.Printf("%s minTrade Filter parse Err: %v, %v", e.GetName(), filter.MinQty, err)
+							logger.Info().Msgf("%s minTrade Filter parse Err: %v, %v", e.GetName(), filter.MinQty, err)
 							minTrade = 0.0
 						}
 					case "PRICE_FILTER":
 						priceFilter, err = strconv.ParseFloat(filter.TickSize, 64)
 						if err != nil {
-							log.Printf("%s Price Filter Err: %v", e.GetName(), err)
+							logger.Info().Msgf("%s Price Filter Err: %v", e.GetName(), err)
 							priceFilter = DEFAULT_PRICE_FILTER
 						}
 					case "MIN_NOTIONAL":
 						minBase, err = strconv.ParseFloat(filter.MinNotional, 64)
 						if err != nil {
-							log.Printf("%s minBase Filter parse Err: %v, %v", e.GetName(), filter.MinNotional, err)
+							logger.Info().Msgf("%s minBase Filter parse Err: %v, %v", e.GetName(), filter.MinNotional, err)
 							minBase = 0.0
 						}
 					}
@@ -313,7 +313,7 @@ func (e *Binance) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 		symbol = p.Symbol
 	}
 
-	// log.Printf("doSpotOrderBook symbo:%+v", symbol)
+	// logger.Info().Msgf("doSpotOrderBook symbo:%+v", symbol)
 
 	mapParams := make(map[string]string)
 	mapParams["symbol"] = symbol
@@ -374,7 +374,7 @@ func (e *Binance) OrderBook(p *pair.Pair) (*exchange.Maker, error) {
 
 func (e *Binance) UpdateAllBalances() {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return
 	}
 
@@ -383,13 +383,13 @@ func (e *Binance) UpdateAllBalances() {
 
 	jsonBalanceReturn := e.ApiKeyGet(make(map[string]string), strRequest)
 	if err := json.Unmarshal([]byte(jsonBalanceReturn), &accountBalance); err != nil {
-		log.Printf("%s UpdateAllBalances json Unmarshal error: %v %s", e.GetName(), err, jsonBalanceReturn)
+		logger.Info().Msgf("%s UpdateAllBalances json Unmarshal error: %v %s", e.GetName(), err, jsonBalanceReturn)
 		return
 	} else {
 		for _, balance := range accountBalance.Balances {
 			freeamount, err := strconv.ParseFloat(balance.Free, 64)
 			if err != nil {
-				log.Printf("%s UpdateAllBalances err: %+v %v", e.GetName(), balance, err)
+				logger.Info().Msgf("%s UpdateAllBalances err: %+v %v", e.GetName(), balance, err)
 				return
 			} else {
 				c := e.GetCoinBySymbol(balance.Asset)
@@ -404,7 +404,7 @@ func (e *Binance) UpdateAllBalances() {
 /* Withdraw(coin *coin.Coin, quantity float64, addr, tag string) */
 func (e *Binance) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) bool {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return false
 	}
 
@@ -422,11 +422,11 @@ func (e *Binance) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) 
 
 	jsonSubmitWithdraw := e.WApiKeyRequest("POST", mapParams, strRequest)
 	if err := json.Unmarshal([]byte(jsonSubmitWithdraw), &withdraw); err != nil {
-		log.Printf("%s Withdraw Json Unmarshal Error: %v %v", e.GetName(), err, jsonSubmitWithdraw)
+		logger.Info().Msgf("%s Withdraw Json Unmarshal Error: %v %v", e.GetName(), err, jsonSubmitWithdraw)
 		return false
 	}
 	if !withdraw.Success {
-		log.Printf("%s Withdraw Failed: %s", e.GetName(), withdraw.Msg)
+		logger.Info().Msgf("%s Withdraw Failed: %s", e.GetName(), withdraw.Msg)
 		return false
 	}
 
@@ -698,7 +698,7 @@ func (e *Binance) WApiKeyRequest(strMethod string, mapParams map[string]string, 
 		return err.Error()
 	}
 
-	// log.Printf("=wwww= strUrl: %v", strUrl) // wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+	// logger.Info().Msgf("=wwww= strUrl: %v", strUrl) // wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 
 	request.Header.Add("Content-Type", "application/json; charset=utf-8")
 	request.Header.Add("X-MBX-APIKEY", e.API_KEY)
@@ -726,7 +726,7 @@ func (e *Binance) TestApi() string {
 
 	mapParams := make(map[string]string)
 
-	log.Printf("====================\nkey: %v, secret: %v, strUrl: %v, nonce: %v, mapParams: %+v", key, secret, strUrl, nonce, mapParams) // ====================
+	logger.Info().Msgf("====================\nkey: %v, secret: %v, strUrl: %v, nonce: %v, mapParams: %+v", key, secret, strUrl, nonce, mapParams) // ====================
 
 	// signature := exchange.ComputeHmac256NoDecode(exchange.Map2UrlQuery(mapParams), e.API_SECRET)
 
@@ -747,7 +747,7 @@ func (e *Binance) TestApi() string {
 		return err.Error()
 	}
 
-	// log.Printf("=wwww= strUrl: %v", strUrl) // wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+	// logger.Info().Msgf("=wwww= strUrl: %v", strUrl) // wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 
 	request.Header.Add("Content-Type", "application/json; charset=utf-8")
 	request.Header.Add("X-MBX-APIKEY", e.API_KEY)

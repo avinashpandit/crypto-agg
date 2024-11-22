@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math"
 	"net/http"
 	"strconv"
@@ -17,6 +16,7 @@ import (
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 )
 
@@ -301,7 +301,7 @@ func (e *Bitz) doWithdraw(operation *exchange.AccountOperation) error {
 
 func (e *Bitz) UpdateAllBalances() {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return
 	}
 
@@ -312,18 +312,18 @@ func (e *Bitz) UpdateAllBalances() {
 
 	jsonBalanceReturn := e.ApiKeyPOST(make(map[string]string), strRequest)
 	if err := json.Unmarshal([]byte(jsonBalanceReturn), &jsonResponse); err != nil {
-		log.Printf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
+		logger.Info().Msgf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
 		return
 	} else if jsonResponse.Status != 200 {
-		log.Printf("%s UpdateAllBalances Failed: %s", e.GetName(), jsonBalanceReturn)
+		logger.Info().Msgf("%s UpdateAllBalances Failed: %s", e.GetName(), jsonBalanceReturn)
 		return
 	}
 	if err := json.Unmarshal(jsonResponse.Data, &userInfo); err != nil {
-		log.Printf("%s UpdateAllBalances Data Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
+		logger.Info().Msgf("%s UpdateAllBalances Data Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
 		return
 	}
 	if err := json.Unmarshal(userInfo.Info, &accountBalance); err != nil {
-		log.Printf("%s Assets are empty: %v %v", e.GetName(), err, userInfo)
+		logger.Info().Msgf("%s Assets are empty: %v %v", e.GetName(), err, userInfo)
 		return
 	}
 
@@ -332,7 +332,7 @@ func (e *Bitz) UpdateAllBalances() {
 		if c != nil {
 			freeamount, err := strconv.ParseFloat(v.Over, 64)
 			if err != nil {
-				log.Printf("%s balance Convert to float64 Error: %v %v", e.GetName(), err, v.Over)
+				logger.Info().Msgf("%s balance Convert to float64 Error: %v %v", e.GetName(), err, v.Over)
 			} else {
 				balanceMap.Set(c.Code, freeamount)
 			}
@@ -342,7 +342,7 @@ func (e *Bitz) UpdateAllBalances() {
 
 func (e *Bitz) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) bool {
 	if e.API_KEY == "" || e.API_SECRET == "" || e.TradePassword == "" {
-		log.Printf("%s API Key, Secret Key or TradePassword are nil", e.GetName())
+		logger.Info().Msgf("%s API Key, Secret Key or TradePassword are nil", e.GetName())
 		return false
 	}
 
@@ -357,14 +357,14 @@ func (e *Bitz) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) boo
 
 	jsonWithdrawReturn := e.ApiKeyPOST(mapParams, strRequest)
 	if err := json.Unmarshal([]byte(jsonWithdrawReturn), &jsonResponse); err != nil {
-		log.Printf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonWithdrawReturn)
+		logger.Info().Msgf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonWithdrawReturn)
 		return false
 	} else if jsonResponse.Status != 200 {
-		log.Printf("%s Withdraw Failed: %v %+v", e.GetName(), jsonResponse.Status, jsonResponse)
+		logger.Info().Msgf("%s Withdraw Failed: %v %+v", e.GetName(), jsonResponse.Status, jsonResponse)
 		return false
 	}
 	if err := json.Unmarshal(jsonResponse.Data, &withdraw); err != nil {
-		log.Printf("%s Withdraw Data Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
+		logger.Info().Msgf("%s Withdraw Data Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
 		return false
 	}
 

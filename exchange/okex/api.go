@@ -9,13 +9,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 )
 
@@ -263,7 +263,7 @@ func (e *Okex) OrderBook(pair *pair.Pair) (*exchange.Maker, error) {
 
 func (e *Okex) UpdateAllBalances() {
 	if e.API_KEY == "" || e.API_SECRET == "" || e.Passphrase == "" {
-		log.Printf("%s API Key, Secret Key or Passphrase are nil", e.GetName())
+		logger.Info().Msgf("%s API Key, Secret Key or Passphrase are nil", e.GetName())
 		return
 	}
 
@@ -271,17 +271,17 @@ func (e *Okex) UpdateAllBalances() {
 	strRequest := "/api/spot/v3/accounts"
 
 	jsonBalanceReturn := e.ApiKeyRequest("GET", nil, strRequest)
-	// log.Printf("jsonBalanceReturn: %v", jsonBalanceReturn)
+	// logger.Info().Msgf("jsonBalanceReturn: %v", jsonBalanceReturn)
 	if err := json.Unmarshal([]byte(jsonBalanceReturn), &accountBalance); err != nil {
 		errorJson := ErrorMsg{}
 		if err := json.Unmarshal([]byte(jsonBalanceReturn), &errorJson); err != nil {
-			log.Printf("%s UpdateAllBalances Err: Code: %v Msg: %v", e.GetName(), errorJson.Code, errorJson.Msg)
+			logger.Info().Msgf("%s UpdateAllBalances Err: Code: %v Msg: %v", e.GetName(), errorJson.Code, errorJson.Msg)
 		} else {
-			log.Printf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
+			logger.Info().Msgf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
 		}
 		return
 	} else if len(accountBalance) == 0 {
-		log.Printf("%s UpdateAllBalances Failed: %v", e.GetName(), jsonBalanceReturn)
+		logger.Info().Msgf("%s UpdateAllBalances Failed: %v", e.GetName(), jsonBalanceReturn)
 		return
 	}
 
@@ -290,7 +290,7 @@ func (e *Okex) UpdateAllBalances() {
 		if c != nil {
 			balanceAvailable, err := strconv.ParseFloat(v.Available, 64)
 			if err != nil {
-				log.Printf("%s available balance conver to float64 err : %v", e.GetName, err)
+				logger.Info().Msgf("%s available balance conver to float64 err : %v", e.GetName, err)
 				balanceAvailable = 0.0
 			}
 			balanceMap.Set(c.Code, balanceAvailable)
@@ -300,7 +300,7 @@ func (e *Okex) UpdateAllBalances() {
 
 func (e *Okex) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) bool {
 	if e.API_KEY == "" || e.API_SECRET == "" || e.Passphrase == "" {
-		log.Printf("%s API Key, Secret Key or Passphrase are nil", e.GetName())
+		logger.Info().Msgf("%s API Key, Secret Key or Passphrase are nil", e.GetName())
 		return false
 	}
 
@@ -317,10 +317,10 @@ func (e *Okex) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) boo
 
 	jsonSubmitWithdraw := e.ApiKeyRequest("POST", mapParams, strRequest)
 	if err := json.Unmarshal([]byte(jsonSubmitWithdraw), &withdrawResponse); err != nil {
-		log.Printf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonSubmitWithdraw)
+		logger.Info().Msgf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonSubmitWithdraw)
 		return false
 	} else if !withdrawResponse.Result {
-		log.Printf("%s Withdraw Failed: %v %v", e.GetName(), withdrawResponse.Code, withdrawResponse.Message)
+		logger.Info().Msgf("%s Withdraw Failed: %v %v", e.GetName(), withdrawResponse.Code, withdrawResponse.Message)
 		return false
 	}
 
@@ -329,7 +329,7 @@ func (e *Okex) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) boo
 
 func (e *Okex) Transfer(coin *coin.Coin, quantity float64, from, to int) bool {
 	if e.API_KEY == "" || e.API_SECRET == "" || e.Passphrase == "" {
-		log.Printf("%s API Key, Secret Key or Passphrase are nil", e.GetName())
+		logger.Info().Msgf("%s API Key, Secret Key or Passphrase are nil", e.GetName())
 		return false
 	}
 
@@ -345,10 +345,10 @@ func (e *Okex) Transfer(coin *coin.Coin, quantity float64, from, to int) bool {
 	// jsonTransfer := e.ApiKeyRequest("POST", mapParams, strRequest)
 
 	// if err := json.Unmarshal([]byte(jsonTransfer), &transfer); err != nil {
-	// 	log.Printf("%s Transfer Unmarshal Err: %v %v", e.GetName, err, jsonTransfer)
+	// 	logger.Info().Msgf("%s Transfer Unmarshal Err: %v %v", e.GetName, err, jsonTransfer)
 	// 	return false
 	// } else if !transfer.Result {
-	// 	log.Printf("%s Transfer Failed: %v %v", e.GetName, transfer.Code, transfer.Message)
+	// 	logger.Info().Msgf("%s Transfer Failed: %v %v", e.GetName, transfer.Code, transfer.Message)
 	// 	return false
 	// }
 
@@ -523,7 +523,7 @@ func (e *Okex) ApiKeyRequest(method string, mapParams map[string]interface{}, st
 		strMessage = TimeStamp + method + strRequestPath + jsonParams
 	}
 
-	// log.Printf("===================strMessage: %v", strMessage)
+	// logger.Info().Msgf("===================strMessage: %v", strMessage)
 
 	signature := exchange.ComputeHmac256Base64(strMessage, e.API_SECRET)
 	strUrl := API_URL + strRequestPath

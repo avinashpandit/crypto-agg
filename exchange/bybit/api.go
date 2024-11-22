@@ -8,13 +8,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math"
 	"net/http"
 	"time"
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 )
 
@@ -252,7 +252,7 @@ func (e *Bybit) DoAccountOperation(operation *exchange.AccountOperation) error {
 
 func (e *Bybit) UpdateAllBalances() {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return
 	}
 
@@ -260,7 +260,7 @@ func (e *Bybit) UpdateAllBalances() {
 
 func (e *Bybit) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) bool {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil", e.GetName())
 		return false
 	}
 

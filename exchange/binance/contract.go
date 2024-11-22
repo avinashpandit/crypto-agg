@@ -247,7 +247,7 @@ func (e *Binance) doGetPositionInfo(operation *exchange.AccountOperation) error 
 	// positionInfo := PositionInfo{}
 	strRequest := "/fapi/v2/positionRisk"
 
-	// log.Printf("strRequest: [%s]", strRequest)
+	// logger.Info().Msgf("strRequest: [%s]", strRequest)
 
 	jsonPositionInfoReturn := e.ContractApiKeyRequest("GET", make(map[string]string), strRequest, operation.TestMode)
 	if operation.DebugMode {
@@ -255,7 +255,7 @@ func (e *Binance) doGetPositionInfo(operation *exchange.AccountOperation) error 
 		operation.CallResponce = jsonPositionInfoReturn
 	}
 
-	// log.Printf("jsonPositionInfoReturn: %v", jsonPositionInfoReturn)
+	// logger.Info().Msgf("jsonPositionInfoReturn: %v", jsonPositionInfoReturn)
 	if err := json.Unmarshal([]byte(jsonPositionInfoReturn), &operation.BinanceOpenPositionList); err != nil {
 		operation.Error = fmt.Errorf("%s doGetPositionInfo Json Unmarshal Err: %v, %s", e.GetName(), err, jsonPositionInfoReturn)
 		log.Print(operation.Error)
@@ -323,7 +323,7 @@ func (e *Binance) doContractAllBalance(operation *exchange.AccountOperation) err
 		operation.CallResponce = jsonAllBalanceReturn
 	}
 
-	// log.Printf("jsonAllBalanceReturn: %v", jsonAllBalanceReturn)
+	// logger.Info().Msgf("jsonAllBalanceReturn: %v", jsonAllBalanceReturn)
 	if err := json.Unmarshal([]byte(jsonAllBalanceReturn), &accountBalances); err != nil {
 		operation.Error = fmt.Errorf("%s ContractAllBalance Json Unmarshal Err: %v, %s", e.GetName(), err, jsonAllBalanceReturn)
 		return operation.Error

@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math"
 	"net/http"
 	"strconv"
@@ -17,6 +16,7 @@ import (
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 )
 
@@ -322,12 +322,12 @@ func (e *Ibankdigital) GetAccounts() { //doesn't work well, always got err-msg o
 
 	jsonAccountsReturn := e.ApiKeyGet(strRequest, make(map[string]string))
 	if err := json.Unmarshal([]byte(jsonAccountsReturn), &jsonResponse); err != nil {
-		log.Printf("%s GetAccounts Json Unmarshal Err: %v %v", e.GetName(), err, jsonAccountsReturn)
+		logger.Info().Msgf("%s GetAccounts Json Unmarshal Err: %v %v", e.GetName(), err, jsonAccountsReturn)
 	} else if jsonResponse.Status != "ok" {
-		log.Printf("%s GetAccounts Failed: %v", e.GetName(), jsonResponse)
+		logger.Info().Msgf("%s GetAccounts Failed: %v", e.GetName(), jsonResponse)
 	}
 	if err := json.Unmarshal(jsonResponse.Data, &accountId); err != nil {
-		log.Printf("%s GetAccounts Data Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
+		logger.Info().Msgf("%s GetAccounts Data Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
 	}
 
 	if len(accountId) >= 1 {
@@ -340,7 +340,7 @@ func (e *Ibankdigital) GetAccounts() { //doesn't work well, always got err-msg o
 
 func (e *Ibankdigital) UpdateAllBalances() {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return
 	}
 
@@ -353,14 +353,14 @@ func (e *Ibankdigital) UpdateAllBalances() {
 
 	jsonBalanceReturn := e.ApiKeyGet(strRequest, mapParams)
 	if err := json.Unmarshal([]byte(jsonBalanceReturn), &jsonResponse); err != nil {
-		log.Printf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
+		logger.Info().Msgf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
 		return
 	} else if jsonResponse.Status != "ok" {
-		log.Printf("%s UpdateAllBalances Failed: %v", e.GetName(), jsonResponse)
+		logger.Info().Msgf("%s UpdateAllBalances Failed: %v", e.GetName(), jsonResponse)
 		return
 	}
 	if err := json.Unmarshal(jsonResponse.Data, &accountBalance); err != nil {
-		log.Printf("%s UpdateAllBalances Data Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
+		logger.Info().Msgf("%s UpdateAllBalances Data Unmarshal Err: %v %s", e.GetName(), err, jsonResponse.Data)
 		return
 	}
 
@@ -368,7 +368,7 @@ func (e *Ibankdigital) UpdateAllBalances() {
 		if balance.Type == "trade" {
 			freeAmount, err := strconv.ParseFloat(balance.Balance, 64)
 			if err != nil {
-				log.Printf("%s balance parse error: %v, %v", e.GetName(), err, balance.Balance)
+				logger.Info().Msgf("%s balance parse error: %v, %v", e.GetName(), err, balance.Balance)
 				return
 			}
 			c := e.GetCoinBySymbol(balance.Currency)
@@ -381,7 +381,7 @@ func (e *Ibankdigital) UpdateAllBalances() {
 
 func (e *Ibankdigital) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) bool {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil", e.GetName())
 		return false
 	}
 
@@ -395,10 +395,10 @@ func (e *Ibankdigital) Withdraw(coin *coin.Coin, quantity float64, addr, tag str
 
 	jsonSubmitWithdraw := e.ApiKeyPost(strRequest, mapParams)
 	if err := json.Unmarshal([]byte(jsonSubmitWithdraw), &jsonResponse); err != nil {
-		log.Printf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonSubmitWithdraw)
+		logger.Info().Msgf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonSubmitWithdraw)
 		return false
 	} else if jsonResponse.Status != "ok" {
-		log.Printf("%s Withdraw Failed: %v", e.GetName(), jsonResponse)
+		logger.Info().Msgf("%s Withdraw Failed: %v", e.GetName(), jsonResponse)
 		return false
 	}
 

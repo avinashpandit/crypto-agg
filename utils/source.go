@@ -8,10 +8,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 	cmap "github.com/orcaman/concurrent-map"
 )
@@ -28,14 +28,14 @@ func GetExchangeDataFromJSON(datapath string, exName exchange.ExchangeName) *Exc
 		data = []byte(exchange.HttpGetRequest(fileName, nil))
 	} else {
 		if data, err = ioutil.ReadFile(fileName); err != nil {
-			log.Printf("Read %s Failed: %v", fileName, err)
+			logger.Info().Msgf("Read %s Failed: %v", fileName, err)
 			return nil
 		}
 	}
 
 	jsonData := &JsonData{}
 	if err := json.Unmarshal(data, &jsonData); err != nil {
-		log.Printf("%s Json Unmarshal Err: %v %s", fileName, err, data)
+		logger.Info().Msgf("%s Json Unmarshal Err: %v %s", fileName, err, data)
 		return nil
 	}
 
@@ -66,14 +66,14 @@ func GetCommonDataFromJSON(datapath string) {
 		data = []byte(exchange.HttpGetRequest(fileName, nil))
 	} else {
 		if data, err = ioutil.ReadFile(fileName); err != nil {
-			log.Printf("Read %s Failed: %v", fileName, err)
+			logger.Info().Msgf("Read %s Failed: %v", fileName, err)
 			return
 		}
 	}
 
 	commonData := &CommonData{}
 	if err := json.Unmarshal(data, &commonData); err != nil {
-		log.Printf("%s Json Unmarshal Err: %v %s", datapath, err, data)
+		logger.Info().Msgf("%s Json Unmarshal Err: %v %s", datapath, err, data)
 		return
 	}
 

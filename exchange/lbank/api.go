@@ -17,7 +17,6 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math"
 	"net/http"
 	"net/url"
@@ -27,6 +26,7 @@ import (
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 )
 
@@ -280,7 +280,7 @@ func (e *Lbank) doWithdraw(operation *exchange.AccountOperation) error {
 
 func (e *Lbank) UpdateAllBalances() {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return
 	}
 
@@ -289,10 +289,10 @@ func (e *Lbank) UpdateAllBalances() {
 
 	jsonBalanceReturn := e.ApiKeyPost(strRequest, make(map[string]string))
 	if err := json.Unmarshal([]byte(jsonBalanceReturn), &accountBalance); err != nil {
-		log.Printf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
+		logger.Info().Msgf("%s UpdateAllBalances Json Unmarshal Err: %v %v", e.GetName(), err, jsonBalanceReturn)
 		return
 	} else if accountBalance.Result != "true" {
-		log.Printf("%s UpdateAllBalances Failed: %v", e.GetName(), jsonBalanceReturn)
+		logger.Info().Msgf("%s UpdateAllBalances Failed: %v", e.GetName(), jsonBalanceReturn)
 		return
 	}
 
@@ -300,7 +300,7 @@ func (e *Lbank) UpdateAllBalances() {
 		c := e.GetCoinBySymbol(key)
 		freeamount, err := strconv.ParseFloat(value, 64)
 		if err != nil {
-			log.Printf("%s balance parse error: %v, %v", e.GetName(), err, value)
+			logger.Info().Msgf("%s balance parse error: %v, %v", e.GetName(), err, value)
 			return
 		}
 		if c != nil {
@@ -311,7 +311,7 @@ func (e *Lbank) UpdateAllBalances() {
 
 func (e *Lbank) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) bool {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return false
 	}
 
@@ -329,10 +329,10 @@ func (e *Lbank) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) bo
 
 	jsonWithdrawReturn := e.ApiKeyPost(strRequest, make(map[string]string))
 	if err := json.Unmarshal([]byte(jsonWithdrawReturn), &withdraw); err != nil {
-		log.Printf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonWithdrawReturn)
+		logger.Info().Msgf("%s Withdraw Json Unmarshal Err: %v %v", e.GetName(), err, jsonWithdrawReturn)
 		return false
 	} else if withdraw.Result != "true" {
-		log.Printf("%s Withdraw Failed: %v", e.GetName(), jsonWithdrawReturn)
+		logger.Info().Msgf("%s Withdraw Failed: %v", e.GetName(), jsonWithdrawReturn)
 		return false
 	}
 
@@ -538,19 +538,19 @@ func ComputeMD5(mapParams map[string]string, strSecret string) string {
 			secret += "-----END RSA PRIVATE KEY-----"
 		}
 	}
-	// log.Printf("%s", secret)
+	// logger.Info().Msgf("%s", secret)
 
 	// Decoding String Private Key by PEM
 	decodeSecret, rest := pem.Decode([]byte(secret))
 	if decodeSecret == nil {
-		log.Printf("Decode Secret Err: %v", string(rest))
+		logger.Info().Msgf("Decode Secret Err: %v", string(rest))
 		return ""
 	}
 
 	//Parse PKCS8 Private Key
 	privateKey, err := x509.ParsePKCS8PrivateKey(decodeSecret.Bytes)
 	if err != nil {
-		log.Printf("Signature Err: %v", err)
+		logger.Info().Msgf("Signature Err: %v", err)
 		return ""
 	}
 

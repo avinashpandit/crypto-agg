@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math"
 	"net/http"
 	"sort"
@@ -18,6 +17,7 @@ import (
 
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
+	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
 )
 
@@ -79,7 +79,7 @@ func (e *Probit) GetCoinsData() error {
 
 		txFee, err := strconv.ParseFloat(data.WithdrawalFee, 64)
 		if err != nil {
-			log.Printf("%s Get Coins txfee parse Err: %v, %v", e.GetName(), err, data.WithdrawalFee)
+			logger.Info().Msgf("%s Get Coins txfee parse Err: %v, %v", e.GetName(), err, data.WithdrawalFee)
 		}
 
 		if c != nil {
@@ -258,7 +258,7 @@ func (e *Probit) DoAccountOperation(operation *exchange.AccountOperation) error 
 
 func (e *Probit) UpdateAllBalances() {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return
 	}
 
@@ -267,13 +267,13 @@ func (e *Probit) UpdateAllBalances() {
 
 	jsonBalanceReturn := e.ApiKeyGet(make(map[string]string), strRequest)
 	if err := json.Unmarshal([]byte(jsonBalanceReturn), &accountBalance); err != nil {
-		log.Printf("%s UpdateAllBalances json Unmarshal error: %v %s", e.GetName(), err, jsonBalanceReturn)
+		logger.Info().Msgf("%s UpdateAllBalances json Unmarshal error: %v %s", e.GetName(), err, jsonBalanceReturn)
 		return
 	} else {
 		for _, balance := range accountBalance.Balances {
 			freeamount, err := strconv.ParseFloat(balance.Free, 64)
 			if err != nil {
-				log.Printf("%s UpdateAllBalances err: %+v %v", e.GetName(), balance, err)
+				logger.Info().Msgf("%s UpdateAllBalances err: %+v %v", e.GetName(), balance, err)
 				return
 			} else {
 				c := e.GetCoinBySymbol(balance.Asset)
@@ -288,7 +288,7 @@ func (e *Probit) UpdateAllBalances() {
 /* Withdraw(coin *coin.Coin, quantity float64, addr, tag string) */
 func (e *Probit) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) bool {
 	if e.API_KEY == "" || e.API_SECRET == "" {
-		log.Printf("%s API Key or Secret Key are nil.", e.GetName())
+		logger.Info().Msgf("%s API Key or Secret Key are nil.", e.GetName())
 		return false
 	}
 
@@ -306,11 +306,11 @@ func (e *Probit) Withdraw(coin *coin.Coin, quantity float64, addr, tag string) b
 
 	jsonSubmitWithdraw := e.WApiKeyRequest("POST", mapParams, strRequest)
 	if err := json.Unmarshal([]byte(jsonSubmitWithdraw), &withdraw); err != nil {
-		log.Printf("%s Withdraw Json Unmarshal Error: %v %v", e.GetName(), err, jsonSubmitWithdraw)
+		logger.Info().Msgf("%s Withdraw Json Unmarshal Error: %v %v", e.GetName(), err, jsonSubmitWithdraw)
 		return false
 	}
 	if !withdraw.Success {
-		log.Printf("%s Withdraw Failed: %s", e.GetName(), withdraw.Msg)
+		logger.Info().Msgf("%s Withdraw Failed: %s", e.GetName(), withdraw.Msg)
 		return false
 	}
 
