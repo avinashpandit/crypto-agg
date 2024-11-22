@@ -128,7 +128,7 @@ func Init() {
 			if cache.SetQuote(string(e.GetName()), p, &bid, &ask) {
 				logger.Info().Msgf("Received: %s %v  %v from exchange %s", p, bid, ask, e.GetName())
 				timestamp := time.Now()
-				err = questdbClient.Table("crypto_prices").
+				err = questdbClient.Table("test_crypto_prices").
 					Symbol("symbol", p).
 					Float64Column("bid", bid.Rate).
 					Float64Column("ask", ask.Rate).
