@@ -76,36 +76,57 @@ func Init() {
 			}
 		}
 	*/
+
+	baseCcys := []string{
+		"SOL",
+		"BTC",
+		"ETH",
+		"BNB",
+		"USDT",
+		"ADA",
+		"XRP",
+		"DOGE",
+		"DOT",
+	}
+
+	pairs := make([]pair.Pair, 0)
+
 	for _, e := range ex {
 
-		baseCcy := "SOL"
-		quoteCcy := "USDT"
+		for _, baseCcy := range baseCcys {
+			quoteCcy := "USDT"
 
-		var pair1 *pair.Pair
-		pair1 = pair.GetPairByKey(baseCcy + "|" + quoteCcy)
-		if pair1 == nil {
-			pair1 = pair.GetPairByKey(quoteCcy + "|" + baseCcy)
+			var pair1 *pair.Pair
+			pair1 = pair.GetPairByKey(baseCcy + "|" + quoteCcy)
 			if pair1 == nil {
-				quoteCcy = "USD"
 				pair1 = pair.GetPairByKey(quoteCcy + "|" + baseCcy)
+				if pair1 == nil {
+					quoteCcy = "USD"
+					pair1 = pair.GetPairByKey(quoteCcy + "|" + baseCcy)
+				}
 			}
-		}
 
+			if pair1 != nil {
+				pairs = append(pairs, *pair1)
+			}
+
+		}
 		var quoteHandler exchange.QuoteHandler = func(bid exchange.Quote, ask exchange.Quote, p string, e exchange.Exchange) error {
-			logger.Info().Msgf("Received: %v  %+v from exchange %s", bid, ask, e.GetName())
+			logger.Info().Msgf("Received: %s %v  %v from exchange %s", p, bid, ask, e.GetName())
 			return nil
 		}
 
-		e.SubscribeAndProcessQuoteMessage([]pair.Pair{*pair1}, quoteHandler)
+		e.SubscribeAndProcessQuoteMessage(pairs, quoteHandler)
 
-		maker, err := e.OrderBook(pair1)
-		if err != nil {
-			logger.Info().Msgf("OrderBook err: %v", err)
-		}
+		/*
+			maker, err := e.OrderBook(pair1)
+			if err != nil {
+				logger.Info().Msgf("OrderBook err: %v", err)
+			}
 
-		if maker != nil && len(maker.Bids) > 0 && len(maker.Asks) > 0 {
-			logger.Info().Msgf("%+v %+v %+v", pair1, maker.Bids[0], maker.Asks[0])
-		}
+			if maker != nil && len(maker.Bids) > 0 && len(maker.Asks) > 0 {
+				logger.Info().Msgf("%+v %+v %+v", pair1, maker.Bids[0], maker.Asks[0])
+				}*/
 	}
 
 	/*e.UpdateAllBalances()
