@@ -125,10 +125,12 @@ func Init() {
 
 		}
 		var quoteHandler exchange.QuoteHandler = func(bid exchange.Quote, ask exchange.Quote, p string, e exchange.Exchange) error {
-			if cache.SetQuote(string(e.GetName()), p, &bid, &ask) {
+			exName := string(e.GetName())
+			if cache.SetQuote(exName, p, &bid, &ask) {
 				logger.Info().Msgf("Received: %s %v  %v from exchange %s", p, bid, ask, e.GetName())
 				timestamp := time.Now()
 				err = questdbClient.Table("test_crypto_prices").
+					Symbol("exchange", exName).
 					Symbol("symbol", p).
 					Float64Column("bid", bid.Rate).
 					Float64Column("ask", ask.Rate).
