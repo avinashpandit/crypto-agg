@@ -11,6 +11,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/avinashpandit/crypto-agg/cache"
 	"github.com/avinashpandit/crypto-agg/coin"
 	"github.com/avinashpandit/crypto-agg/exchange"
 	"github.com/avinashpandit/crypto-agg/initial"
@@ -41,9 +42,12 @@ func main() {
 }
 
 func Init() {
+	cache.InitCache()
+
 	var ex []exchange.Exchange = make([]exchange.Exchange, 1)
 	//ex[0] = InitExchange(exchange.BYBIT)
 	ex[0] = InitExchange(exchange.KRAKEN)
+
 	//ex[2] = InitExchange(exchange.KUCOIN)
 	/*ex[2] = InitExchange(exchange.COINBASE)
 	 */
@@ -112,7 +116,10 @@ func Init() {
 
 		}
 		var quoteHandler exchange.QuoteHandler = func(bid exchange.Quote, ask exchange.Quote, p string, e exchange.Exchange) error {
-			logger.Info().Msgf("Received: %s %v  %v from exchange %s", p, bid, ask, e.GetName())
+			if cache.SetQuote(string(e.GetName()), p, &bid, &ask) {
+				logger.Info().Msgf("Received: %s %v  %v from exchange %s", p, bid, ask, e.GetName())
+			}
+
 			return nil
 		}
 

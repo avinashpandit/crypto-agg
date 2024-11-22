@@ -10,6 +10,7 @@ require (
 )
 
 require (
+	github.com/allegro/bigcache/v3 v3.1.0
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/orcaman/concurrent-map v0.0.0-20210106121528-16402b402231 // indirect
