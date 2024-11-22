@@ -5,11 +5,13 @@ package main
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"runtime"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/avinashpandit/crypto-agg/cache"
 	"github.com/avinashpandit/crypto-agg/coin"
@@ -17,6 +19,7 @@ import (
 	"github.com/avinashpandit/crypto-agg/initial"
 	"github.com/avinashpandit/crypto-agg/logger"
 	"github.com/avinashpandit/crypto-agg/pair"
+	"github.com/questdb/go-questdb-client/v3"
 )
 
 func main() {
@@ -94,6 +97,12 @@ func Init() {
 	}
 
 	pairs := make([]pair.Pair, 0)
+	ctx1 := context.TODO()
+
+	questdbClient, err := questdb.LineSenderFromConf(ctx1, "http::addr=localhost:9000;username=admin;password=quest;auto_flush_rows=100;auto_flush_interval=500;")
+	if err != nil {
+		panic("Failed to create client")
+	}
 
 	for _, e := range ex {
 
@@ -118,6 +127,16 @@ func Init() {
 		var quoteHandler exchange.QuoteHandler = func(bid exchange.Quote, ask exchange.Quote, p string, e exchange.Exchange) error {
 			if cache.SetQuote(string(e.GetName()), p, &bid, &ask) {
 				logger.Info().Msgf("Received: %s %v  %v from exchange %s", p, bid, ask, e.GetName())
+				timestamp := time.Now()
+				err = questdbClient.Table("crypto_prices").
+					Symbol("symbol", p).
+					Float64Column("bid", bid.Rate).
+					Float64Column("ask", ask.Rate).
+					At(ctx1, timestamp)
+
+				if err != nil {
+					panic("Failed to insert data")
+				}
 			}
 
 			return nil

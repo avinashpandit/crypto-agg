@@ -14,5 +14,6 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/orcaman/concurrent-map v0.0.0-20210106121528-16402b402231 // indirect
-	golang.org/x/sys v0.12.0 // indirect
+	github.com/questdb/go-questdb-client/v3 v3.2.0
+	golang.org/x/sys v0.16.0 // indirect
 )
